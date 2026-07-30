@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>PaisaFlow AI — Accounts Receivable Intelligence | TMC × Al-Karam Textiles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Fraunces:ital,opsz,wght@1,9..144,500&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#09090c; --card:#131317; --card2:#17171b; --panel:#0c0c10;
+  --line:rgba(255,255,255,0.09); --line-soft:rgba(255,255,255,0.05);
+  --ink:#f3f1ea; --muted:#9a9da8; --muted-dim:#6c6f79;
+  --ember:#1f9d5f; --ember-dim:#157a49; --ember-soft:rgba(31,157,95,0.12);
+  --cool:#eab24a; --green:#3ec48c; --amber:#e8b13d;
+  --sans:'Inter',sans-serif; --disp:'Space Grotesk',sans-serif; --serif:'Fraunces',serif; --mono:'Space Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{
+  font-family:var(--sans);background:var(--bg);color:var(--ink);
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:56px 24px 40px;position:relative;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(600px 400px at 15% 8%, rgba(31,157,95,.09), transparent 60%),
+    radial-gradient(700px 500px at 88% 82%, rgba(234,178,74,.05), transparent 60%);
+}
+.wrap{max-width:1320px;width:100%;position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
+
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:34px}
+.brand .dot{width:8px;height:8px;border-radius:50%;background:var(--ember);box-shadow:0 0 0 4px var(--ember-soft)}
+.brand span{font-family:var(--mono);font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-dim)}
+
+.hero{text-align:center;max-width:1040px;margin-bottom:14px}
+.hero .kicker{font-family:var(--mono);font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--ember);margin-bottom:16px}
+.hero h1{font-family:var(--disp);font-weight:700;font-size:92px;letter-spacing:.5px;line-height:1;display:inline-flex;align-items:center}
+.hero h1 .sub-word{color:var(--ember);position:relative;display:inline-block}
+/* heartbeat pulse dot riding the accented letter */
+.hero h1 .pulse-dot{
+  position:absolute;top:-13px;left:50%;transform:translateX(-50%);width:9px;height:9px;border-radius:50%;
+  background:var(--ember);box-shadow:0 0 0 0 rgba(31,157,95,.55);
+  animation:beat 2.1s ease-out infinite;
+}
+@keyframes beat{
+  0%   {box-shadow:0 0 0 0 rgba(31,157,95,.55)}
+  70%  {box-shadow:0 0 0 15px rgba(31,157,95,0)}
+  100% {box-shadow:0 0 0 0 rgba(31,157,95,0)}
+}
+.hero .tagline{font-family:var(--serif);font-style:italic;font-weight:500;font-size:34px;line-height:1.35;color:var(--ink);margin:30px 0 20px;max-width:900px}
+.hero p.desc{font-size:20px;color:var(--muted);line-height:1.6;max-width:860px;margin:0 auto}
+
+.cap-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:34px 0 50px;width:100%}
+.cap-pill{font-family:var(--mono);font-size:15px;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:12px 16px;background:var(--card2);display:flex;align-items:center;justify-content:center;text-align:center}
+
+.choice-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;width:100%;margin-bottom:36px}
+.choice-row.single{grid-template-columns:1fr;max-width:100%;margin-bottom:46px}
+.journeys-heading{text-align:center;max-width:1040px;margin-bottom:22px}
+.journeys-heading h3{font-family:var(--disp);font-size:28px;font-weight:600;margin-bottom:8px}
+.journeys-heading p{font-size:17px;color:var(--muted-dim)}
+.journey-row{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;width:100%;margin-bottom:40px}
+.journey-card{padding:34px 30px}
+.journey-card .jnum{font-family:var(--mono);font-size:14px;color:var(--muted-dim);letter-spacing:.1em;margin-bottom:14px}
+.journey-card h2{font-size:25px}
+.journey-card p{font-size:17px;min-height:132px;line-height:1.6}
+.journey-card .aud{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--cool);margin-bottom:14px}
+.journey-card .cta{font-size:15px;padding:12px 20px}
+.choice{
+  background:var(--card);border:1px solid var(--line);border-radius:16px;padding:32px 28px;
+  display:flex;flex-direction:column;cursor:pointer;text-decoration:none;color:var(--ink);
+  transition:border-color .2s ease, transform .2s ease, background .2s ease;position:relative;overflow:hidden;
+}
+.choice::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--ember),transparent);opacity:0;transition:opacity .2s ease;
+}
+.choice:hover{border-color:rgba(31,157,95,.45);transform:translateY(-3px);background:var(--card2)}
+.choice:hover::before{opacity:1}
+.choice .icon{font-size:42px;margin-bottom:18px;color:var(--ember)}
+.choice h2{font-family:var(--disp);font-size:30px;font-weight:600;margin-bottom:10px}
+.choice p{font-size:18px;color:var(--muted);line-height:1.6;margin-bottom:22px;flex:1}
+.choice .cta{
+  font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:.03em;
+  color:#04122e;background:var(--ember);border-radius:8px;padding:11px 18px;
+  display:inline-flex;align-items:center;gap:8px;width:fit-content;transition:opacity .15s ease;
+}
+.choice:hover .cta{opacity:.88}
+.choice .meta{font-family:var(--mono);font-size:13px;color:var(--muted-dim);margin-top:14px;letter-spacing:.03em}
+
+/* journey cards are <button> — reset native styling */
+button.choice{font-family:inherit;text-align:left;width:100%;-webkit-appearance:none;appearance:none;outline:none}
+
+/* video overlay player */
+#vplayer{position:fixed;inset:0;z-index:2000;display:none;flex-direction:column;
+  background:rgba(6,6,9,.94);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#vplayer.open{display:flex}
+.vp-top{display:flex;align-items:center;gap:16px;padding:16px 22px;border-bottom:1px solid var(--line)}
+.vp-back{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);background:none;border:1px solid var(--line);border-radius:7px;
+  padding:8px 14px;cursor:pointer;transition:all .15s ease}
+.vp-back:hover{color:var(--ink);border-color:var(--ember-dim)}
+.vp-title{font-family:var(--disp);font-size:15px;font-weight:600;color:var(--ink)}
+.vp-title .d{color:var(--ember);margin-right:9px}
+.vp-close{margin-left:auto;background:none;border:none;color:var(--muted);font-size:24px;
+  cursor:pointer;line-height:1;padding:2px 8px}
+.vp-close:hover{color:var(--ink)}
+.vp-stage{flex:1;display:flex;align-items:center;justify-content:center;padding:26px;min-height:0}
+#vp-video{max-width:100%;max-height:100%;border-radius:10px;border:1px solid var(--line);
+  box-shadow:0 24px 70px rgba(0,0,0,.55);background:#000}
+
+.quote{
+  font-family:var(--serif);font-style:italic;font-size:23px;color:var(--ink);text-align:center;
+  max-width:760px;line-height:1.5;margin-bottom:12px;
+}
+.quote::before,.quote::after{color:var(--ember)}
+.attrib{font-family:var(--mono);font-size:14px;color:var(--muted-dim);text-align:center;margin-bottom:40px}
+
+.foot{
+  font-size:13px;color:var(--muted-dim);text-align:center;max-width:820px;line-height:1.7;
+  border-top:1px solid var(--line-soft);padding-top:22px;
+}
+.foot b{color:var(--muted)}
+
+@media (max-width:720px){
+  .choice-row{grid-template-columns:1fr}
+  .journey-row{grid-template-columns:1fr}
+  .cap-row{grid-template-columns:repeat(2,1fr)}
+  .hero h1{font-size:62px}
+  .hero .tagline{font-size:25px}
+  .journey-card p{min-height:0}
+}
+/* ---- light theme ---- */
+body.light{
+  --bg:#f5f3ee; --card:#ffffff; --card2:#faf8f3; --panel:#efece5;
+  --line:rgba(24,22,18,0.12); --line-soft:rgba(24,22,18,0.06);
+  --ink:#1b1917; --muted:#5c5e66; --muted-dim:#8a8c94;
+  --ember-soft:rgba(31,157,95,0.14);
+}
+body.light::before{
+  background:
+    radial-gradient(600px 400px at 15% 8%, rgba(31,157,95,.07), transparent 60%),
+    radial-gradient(700px 500px at 88% 82%, rgba(234,178,74,.05), transparent 60%);
+}
+
+/* ---- theme toggle ---- */
+.theme-toggle{
+  position:fixed;top:18px;right:18px;z-index:50;
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);background:var(--card);border:1px solid var(--line);
+  border-radius:20px;padding:8px 14px;cursor:pointer;transition:all .18s ease;
+}
+.theme-toggle:hover{color:var(--ink);border-color:var(--ember-dim)}
+.theme-toggle .ic{font-size:13px;line-height:1;color:var(--ember)}
+@media(max-width:560px){.theme-toggle{top:12px;right:12px;padding:7px 11px}}
+</style>
+</head>
+<body>
+<button class="theme-toggle" id="theme-toggle" aria-label="Toggle light and dark theme">
+  <span class="ic" id="theme-ic">☀</span><span id="theme-label">Light</span>
+</button>
+<div class="wrap">
+
+
+  <div class="brand"><span class="dot"></span><span>TMC AiNow &middot; Prepared for Al-Karam Textiles</span></div>
+
+  <div class="hero">
+    <div class="kicker">Accounts Receivable AI &middot; Pilot Program</div>
+    <h1>PaisaFlow<span class="sub-word"> AI<span class="pulse-dot"></span></span></h1>
+    <p class="tagline">"Every invoice you're owed, chased by an AI that never forgets."</p>
+    <p class="desc">PaisaFlow scores every outstanding invoice for payment risk, historical delay, sector cash-cycle volatility, and A R concentration, then drafts the reminder in the tone and language your client actually responds to: English, Roman Urdu, or Urdu script. Every reply is logged against the client, so nothing gets lost in a WhatsApp thread. It also tracks what you owe your own vendors, and suggests which bank account should pay each bill. A human approves every send.</p>
+  </div>
+
+  <div class="cap-row">
+    <span class="cap-pill">Predictive risk scoring</span>
+    <span class="cap-pill">AI reminder generation</span>
+    <span class="cap-pill">WhatsApp &middot; Email &middot; Roman Urdu</span>
+    <span class="cap-pill">Full conversation history</span>
+    <span class="cap-pill">Vendor payables tracking</span>
+    <span class="cap-pill">Bank-account routing</span>
+    <span class="cap-pill">Append-only activity log</span>
+    <span class="cap-pill" style="border-color:rgba(31,157,95,.35);color:var(--ember)">&#128274; AI drafts, you approve every send</span>
+  </div>
+
+  <div class="choice-row single">
+    <a class="choice" id="demo-link" href="PaisaFlow_demo.html" target="_blank" rel="noopener">
+      <div class="icon">&#9673;</div>
+      <h2>Launch Interactive Demo</h2>
+      <p>Click through the live dashboard yourself, the receivables overview, a single invoice traced from risk flag to resolution, exactly why a client was scored as risky, which vendor bill gets paid from which bank account and why, and the append-only activity log behind every number, exactly as your finance team would use it day to day.</p>
+      <span class="cta">Open Demo &rarr;</span>
+      <span class="meta">Opens in a new tab &middot; self-contained, no install</span>
+    </a>
+  </div>
+
+  <div class="journeys-heading">
+    <h3>Or take a guided walkthrough, pick the one that matches what you need</h3>
+    <p>Three short, self-driving tours instead of one long one, each focused on a different part of the story.</p>
+  </div>
+
+  <div class="journey-row">
+    <button class="choice journey-card" data-video="PaisaFlowAI_walkthrough1_ExecutiveOverview.mp4" data-title="Executive Overview">
+      <div class="jnum">01</div>
+      <h2>Executive Overview</h2>
+      <div class="aud">For decision-makers</div>
+      <p>The business case: total outstanding receivables, how collection time fell from 45 to 28 days, how many invoices are trending risky, and the margin protected, roughly PKR 3.7M a year on this pilot. The pitch, not the operational detail.</p>
+      <span class="cta">&#9654; Play walkthrough &rarr;</span>
+    </button>
+    <button class="choice journey-card" data-video="PaisaFlowAI_walkthrough2_LiveCollections.mp4" data-title="Live Collections &amp; Reminder Response">
+      <div class="jnum">02</div>
+      <h2>Live Collections &amp; Reminder Response</h2>
+      <div class="aud">For A R and finance staff</div>
+      <p>The day-to-day view: one invoice traced from an 84% risk flag through a drafted reminder, a sent WhatsApp message, a logged reply, and a resolved balance, then why that client was scored as risky in the first place.</p>
+      <span class="cta">&#9654; Play walkthrough &rarr;</span>
+    </button>
+    <button class="choice journey-card" data-video="PaisaFlowAI_walkthrough3_PayablesRiskCash.mp4" data-title="Payables, Risk &amp; Cash Control">
+      <div class="jnum">03</div>
+      <h2>Payables, Risk &amp; Cash Control</h2>
+      <div class="aud">For finance controllers &amp; oversight</div>
+      <p>The forward view: which bank account should pay a vendor bill and why, the net cash position pulling bank balance, receivables and payables into one number, and the append-only activity log that traces every figure back to its source.</p>
+      <span class="cta">&#9654; Play walkthrough &rarr;</span>
+    </button>
+  </div>
+
+  <p class="quote">"Proven on Al-Karam's own client book first, scaled only once the pilot proves the case."</p>
+  <p class="attrib">&mdash; TMC AiNow, PaisaFlow AI product catalogue</p>
+
+  <div class="foot">
+    Engineered by TMC and proven on Al-Karam Textiles' own receivables book before any scale decision.<br/>
+    Figures and on-screen data shown throughout are illustrative, for discussion purposes.
+  </div>
+
+</div>
+
+<!-- video overlay player -->
+<div id="vplayer" role="dialog" aria-modal="true">
+  <div class="vp-top">
+    <button class="vp-back" id="vp-back">← Back to menu</button>
+    <div class="vp-title"><span class="d">●</span><span id="vp-title-text">Walkthrough</span></div>
+    <button class="vp-close" id="vp-close" aria-label="Close">✕</button>
+  </div>
+  <div class="vp-stage">
+    <video id="vp-video" controls playsinline preload="metadata"></video>
+  </div>
+</div>
+
+<script>
+(function(){
+  var overlay = document.getElementById('vplayer');
+  var video   = document.getElementById('vp-video');
+  var titleEl = document.getElementById('vp-title-text');
+
+  function openVideo(src, title){
+    titleEl.innerHTML = title || 'Walkthrough';
+    video.src = src;
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    var p = video.play();
+    if (p && p.catch) { p.catch(function(){ /* user can press play */ }); }
+  }
+  function closeVideo(){
+    try { video.pause(); } catch(e){}
+    overlay.classList.remove('open');
+    video.removeAttribute('src');
+    video.load();
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('.journey-card[data-video]').forEach(function(card){
+    card.addEventListener('click', function(){
+      openVideo(card.getAttribute('data-video'), card.getAttribute('data-title'));
+    });
+  });
+  document.getElementById('vp-back').addEventListener('click', closeVideo);
+  document.getElementById('vp-close').addEventListener('click', closeVideo);
+  overlay.addEventListener('click', function(e){ if (e.target === overlay) closeVideo(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && overlay.classList.contains('open')) closeVideo(); });
+})();
+</script>
+<script>
+(function(){
+  var body = document.body, ic = document.getElementById('theme-ic'),
+      lbl = document.getElementById('theme-label'), btn = document.getElementById('theme-toggle');
+  function apply(light){
+    body.classList.toggle('light', light);
+    ic.textContent  = light ? '☾' : '☀';
+    lbl.textContent = light ? 'Dark' : 'Light';
+    var dl=document.getElementById('demo-link'); if(dl){ dl.href='AlKaram_PaisaFlow_demo.html?theme='+(light?'light':'dark'); }
+    try { localStorage.setItem('paisaflow-theme', light ? 'light' : 'dark'); } catch(e){}
+  }
+  var saved;
+  try { saved = localStorage.getItem('paisaflow-theme'); } catch(e){}
+  apply(saved === 'light');
+  btn.addEventListener('click', function(){ apply(!body.classList.contains('light')); });
+})();
+</script>
+</body>
+</html>

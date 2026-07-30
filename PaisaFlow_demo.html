@@ -1,0 +1,2364 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PaisaFlow AI | Accounts Receivable Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            50:'#f0faf5', 100:'#dcf5e6', 200:'#b8ebcd', 300:'#82d9a8', 400:'#4dbf82',
+            500:'#1f9d5f', 600:'#157a49', 700:'#0f5f39', 800:'#0c4a2d', 900:'#093a24',
+          },
+        },
+        fontFamily: {
+          display: ['Space Grotesk', 'sans-serif'],
+          sans: ['Inter', 'sans-serif'],
+          mono: ['"Space Mono"', 'monospace'],
+        },
+        boxShadow: {
+          'soft': '0 1px 2px 0 rgba(15,23,42,0.04), 0 1px 3px 0 rgba(15,23,42,0.06)',
+          'card': '0 1px 3px 0 rgba(15,23,42,0.06), 0 8px 24px -8px rgba(15,23,42,0.08)',
+        }
+      }
+    }
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-feature-settings: "cv11"; }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+  .dark ::-webkit-scrollbar-thumb { background: #334155; }
+
+  .font-urdu { font-family: 'Noto Nastaliq Urdu', serif; line-height: 2.3; }
+
+  .drawer { transition: transform .38s cubic-bezier(.4,0,.2,1); }
+  .drawer-closed { transform: translateX(100%); }
+
+  .modal-pop { transition: transform .28s cubic-bezier(.16,1,.3,1), opacity .28s ease; }
+  .modal-closed { transform: scale(.96); opacity: 0; pointer-events: none; }
+
+  .backdrop-layer { transition: opacity .3s ease; }
+
+  @keyframes toastIn { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  .toast-anim { animation: toastIn .3s cubic-bezier(.16,1,.3,1); }
+
+  @keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+  .pulse-dot { animation: pulseDot 1.8s ease-in-out infinite; }
+
+  @keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+  .shimmer { background: linear-gradient(90deg, #e2e8f0 0px, #f1f5f9 40px, #e2e8f0 80px); background-size: 600px 100%; animation: shimmer 1.4s infinite linear; }
+  .dark .shimmer { background: linear-gradient(90deg, #1e293b 0px, #334155 40px, #1e293b 80px); background-size: 600px 100%; }
+
+  .glow-text { background: linear-gradient(90deg, #157a49, #4dbf82); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  .risk-chip-high { animation: pulseDot 2s ease-in-out infinite; }
+
+  .whatsapp-tail::before {
+    content: ''; position: absolute; top: 0; right: -7px; width: 0; height: 0;
+    border-top: 8px solid #d9fdd3; border-right: 8px solid transparent;
+  }
+
+  .whatsapp-thread-bg { background-color: #e5ddd5; }
+  .dark .whatsapp-thread-bg { background-color: #0b141a; }
+
+  input[type="text"]:focus, input[type="search"]:focus { outline: none; }
+
+  .segmented button.active { background: #0f172a; color: white; }
+  .dark .segmented button.active { background: #1f9d5f; color: #0f172a; }
+
+  .tab-underline { position: relative; }
+  .tab-underline.active::after { content:''; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:#157a49; border-radius:2px; }
+
+  ::selection { background: #b8ebcd; color: #0f172a; }
+</style>
+</head>
+<body class="font-sans bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased transition-colors duration-300">
+
+<div id="app" class="flex h-screen overflow-hidden">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="w-[76px] lg:w-64 shrink-0 bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-transparent flex flex-col justify-between py-6 transition-colors duration-300">
+    <div>
+      <div class="px-4 lg:px-6 mb-8 flex items-center gap-2">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shrink-0 shadow-lg shadow-brand-500/20">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 12L10 18L20 6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="hidden lg:block">
+          <p class="font-display font-extrabold text-slate-900 dark:text-white text-sm leading-tight tracking-tight">PaisaFlow <span class="text-brand-600 dark:text-brand-400">AI</span></p>
+          <p class="text-[10px] text-slate-400 dark:text-slate-500 leading-tight">by TallyMarks Consulting</p>
+        </div>
+      </div>
+
+      <nav class="space-y-1 px-3 lg:px-4">
+        <button data-view="dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-400">
+          <svg class="shrink-0" width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="16" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>
+          <span class="hidden lg:inline">Dashboard</span>
+        </button>
+        <button data-view="clients" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
+          <svg class="shrink-0" width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span class="hidden lg:inline">Client Directory</span>
+        </button>
+        <button data-view="reminders" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
+          <svg class="shrink-0" width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="hidden lg:inline">AI Reminders</span>
+        </button>
+        <button data-view="analytics" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
+          <svg class="shrink-0" width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 15l4-5 3 3 5-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="hidden lg:inline">Predictive Analytics</span>
+        </button>
+        <div class="pt-3 mt-2 border-t border-slate-200 dark:border-white/5">
+          <p class="hidden lg:block px-3 pb-2 text-[10px] font-semibold text-slate-400 dark:text-slate-600 uppercase tracking-wide">Accounts Payable</p>
+        </div>
+        <button data-view="vendors" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
+          <svg class="shrink-0" width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="hidden lg:inline">Vendors &amp; Payables</span>
+        </button>
+        <button data-view="bankaccounts" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
+          <svg class="shrink-0" width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="2" y="7" width="20" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M2 10h20M6 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 7V5a2 2 0 012-2h6a2 2 0 012 2v2" stroke="currentColor" stroke-width="2"/></svg>
+          <span class="hidden lg:inline">Bank Accounts</span>
+        </button>
+        <button data-view="activitylog" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
+          <svg class="shrink-0" width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M21 12a9 9 0 11-9-9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 7v5l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 3v6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="hidden lg:inline">Activity Log</span>
+        </button>
+      </nav>
+    </div>
+
+    <div class="px-3 lg:px-4 space-y-3">
+      <button onclick="location.reload()" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+        <svg class="shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M1 4v6h6M23 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="hidden lg:inline">Reset Demo</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN COLUMN ============ -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- TOP BAR -->
+    <header class="h-[72px] shrink-0 flex items-center justify-between px-5 lg:px-8 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors duration-300">
+      <div class="flex items-center gap-4">
+        <img src="https://tmcltd.com/wp-content/uploads/2023/11/TMC-Logo.png" alt="TallyMarks Consulting" class="h-10 lg:h-11 w-auto object-contain" onerror="this.style.display='none'">
+        <div class="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
+        <div class="hidden sm:block">
+          <h1 class="font-display font-extrabold text-lg text-slate-900 dark:text-white tracking-tight leading-tight">PaisaFlow <span class="text-brand-600 dark:text-brand-400">AI</span></h1>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 leading-tight">Accounts Receivable, automated for Pakistani SMEs</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-4">
+        <span class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-50 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#157a49"/></svg>
+          <span class="text-[11px] font-semibold text-brand-700 dark:text-brand-400">Powered by AiNow</span>
+        </span>
+
+        <button id="themeToggle" class="w-9 h-9 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 transition-colors">
+          <svg id="iconMoon" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg id="iconSun" width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+
+        <div class="relative">
+          <button id="notifBell" class="w-9 h-9 relative flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 transition-colors">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span id="notifDot" class="absolute top-1 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+          </button>
+          <div id="notifDropdown" class="hidden absolute right-0 top-11 w-72 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl shadow-2xl overflow-hidden z-50">
+            <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+              <p class="text-xs font-bold text-slate-800 dark:text-white">Notifications</p>
+            </div>
+            <div id="notifList" class="divide-y divide-slate-100 dark:divide-slate-800 max-h-72 overflow-y-auto"></div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2.5 pl-2 sm:pl-3 border-l border-slate-200 dark:border-slate-700">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 dark:from-brand-400 dark:to-brand-600 flex items-center justify-center text-white text-xs font-bold shrink-0">R</div>
+          <div class="hidden md:block leading-tight">
+            <p class="text-xs font-semibold text-slate-800 dark:text-slate-100">Rumaan</p>
+            <p class="text-[10px] text-slate-400">Al-Karam Textiles</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN SCROLLABLE AREA -->
+    <main class="flex-1 overflow-y-auto px-5 lg:px-8 py-6 lg:py-8">
+
+      <!-- ============ DASHBOARD VIEW ============ -->
+      <div id="view-dashboard" class="view-panel space-y-7">
+        <div class="flex items-end justify-between flex-wrap gap-3">
+          <div>
+            <h2 class="font-display font-bold text-2xl text-slate-900 dark:text-white tracking-tight">Business Overview</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Receivables, payables, and cash position, refreshed continuously by AiNow.</p>
+          </div>
+        </div>
+
+        <!-- NET CASH POSITION -->
+        <section id="netCashBanner"></section>
+
+        <!-- RECEIVABLES KPI CARDS -->
+        <div>
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2.5">Receivables (Accounts Receivable)</p>
+          <section id="kpiRow" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4"></section>
+        </div>
+
+        <!-- PAYABLES KPI CARDS -->
+        <div>
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2.5">Payables (Accounts Payable)</p>
+          <section id="apKpiRowDashboard" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4"></section>
+        </div>
+
+        <!-- CHARTS ROW -->
+        <section class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <div class="xl:col-span-2 bg-white dark:bg-slate-900 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 p-5 lg:p-6">
+            <div class="flex items-center justify-between mb-1">
+              <h3 class="font-display font-bold text-slate-800 dark:text-white text-sm">Days Sales Outstanding (DSO) Trend</h3>
+              <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full">-38% in 6 months</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-4">AiNow-assisted collections cut average payment delay from 45 to 28 days</p>
+            <div id="dsoChart"></div>
+          </div>
+          <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 p-5 lg:p-6">
+            <h3 class="font-display font-bold text-slate-800 dark:text-white text-sm mb-1">Portfolio Risk Distribution</h3>
+            <p class="text-xs text-slate-400 mb-4">Across 12 active outstanding invoices</p>
+            <div id="riskDonut" class="flex items-center gap-5"></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ============ CLIENT DIRECTORY VIEW ============ -->
+      <div id="view-clients" class="view-panel space-y-7 hidden">
+        <div>
+          <h2 class="font-display font-bold text-2xl text-slate-900 dark:text-white tracking-tight">Client Directory</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Every outstanding client invoice, searchable and filterable by risk.</p>
+        </div>
+
+        <section class="bg-white dark:bg-slate-900 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 overflow-hidden">
+          <div class="p-5 lg:p-6 pb-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <h3 class="font-display font-bold text-slate-800 dark:text-white text-base">Client &amp; Invoice Directory</h3>
+              <p class="text-xs text-slate-400 mt-0.5" id="tableSummary">Showing 12 of 12 outstanding invoices</p>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="relative">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input id="searchInput" type="search" placeholder="Search client or invoice #" class="pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 w-56 focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500">
+              </div>
+              <div id="riskFilters" class="flex items-center gap-1.5"></div>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-[11px] uppercase tracking-wide text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-800">
+                  <th class="px-6 py-3 font-semibold">Invoice #</th>
+                  <th class="px-3 py-3 font-semibold">Client</th>
+                  <th class="px-3 py-3 font-semibold">Amount (PKR)</th>
+                  <th class="px-3 py-3 font-semibold">Due Date</th>
+                  <th class="px-3 py-3 font-semibold">Payment Risk</th>
+                  <th class="px-6 py-3 font-semibold text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="invoiceTableBody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- ============ AI REMINDERS VIEW ============ -->
+      <div id="view-reminders" class="view-panel space-y-7 hidden">
+        <div>
+          <h2 class="font-display font-bold text-2xl text-slate-900 dark:text-white tracking-tight">AI Reminder Center</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Pick an invoice on the left, then tune tone, language and channel — AiNow drafts the message instantly.</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+          <div id="remindersList" class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 overflow-hidden self-start"></div>
+          <div id="remindersPlaygroundWrap" class="lg:col-span-3 bg-white dark:bg-slate-900 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 p-5 lg:p-6"></div>
+        </div>
+      </div>
+
+      <!-- ============ PREDICTIVE ANALYTICS VIEW ============ -->
+      <div id="view-analytics" class="view-panel space-y-7 hidden">
+        <div>
+          <h2 class="font-display font-bold text-2xl text-slate-900 dark:text-white tracking-tight">Predictive Analytics</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Why AiNow flagged each client the way it did, ranked highest risk first.</p>
+        </div>
+        <div id="analyticsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+      </div>
+
+      <!-- ============ VENDORS & PAYABLES VIEW ============ -->
+      <div id="view-vendors" class="view-panel space-y-7 hidden">
+        <div>
+          <h2 class="font-display font-bold text-2xl text-slate-900 dark:text-white tracking-tight">Vendors &amp; Payables</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">What Al-Karam Textiles owes its suppliers, prioritized by AiNow.</p>
+        </div>
+
+        <section id="apKpiRow" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4"></section>
+
+        <section class="bg-white dark:bg-slate-900 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 overflow-hidden">
+          <div class="p-5 lg:p-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <h3 class="font-display font-bold text-slate-800 dark:text-white text-base">Bills Payable</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Recalculated by AiNow to balance vendor relationships against your own cash flow</p>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-[11px] uppercase tracking-wide text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-800">
+                  <th class="px-6 py-3 font-semibold">Bill #</th>
+                  <th class="px-3 py-3 font-semibold">Vendor</th>
+                  <th class="px-3 py-3 font-semibold">Amount (PKR)</th>
+                  <th class="px-3 py-3 font-semibold">Due Date</th>
+                  <th class="px-3 py-3 font-semibold">Payment Priority</th>
+                  <th class="px-6 py-3 font-semibold text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="vendorBillsTableBody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- ============ BANK ACCOUNTS VIEW ============ -->
+      <div id="view-bankaccounts" class="view-panel space-y-7 hidden">
+        <div>
+          <h2 class="font-display font-bold text-2xl text-slate-900 dark:text-white tracking-tight">Business Bank Accounts</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Live balances across every account — AiNow recommends which one to pay a vendor bill from.</p>
+        </div>
+        <section id="bankTotalCash"></section>
+        <section id="bankAccountsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4"></section>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 p-5 lg:p-6">
+          <h3 class="font-display font-bold text-slate-800 dark:text-white text-sm mb-1">How AiNow picks an account</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">When you schedule a vendor payment, AiNow recommends the <span class="font-semibold text-slate-700 dark:text-slate-200">smallest account that can still fully cover the payment</span> — this keeps your larger reserve accounts free for bigger upcoming obligations instead of draining them for small bills. If no single account has enough balance, it flags the shortfall so you can top up or split the payment manually.</p>
+        </div>
+      </div>
+
+      <!-- ============ ACTIVITY LOG VIEW ============ -->
+      <div id="view-activitylog" class="view-panel space-y-7 hidden">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <h2 class="font-display font-bold text-2xl text-slate-900 dark:text-white tracking-tight">Activity Log</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Every reminder sent, every reply received, every vendor payment scheduled — fully logged.</p>
+          </div>
+          <select id="activityFilterSelect" class="px-3.5 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 shrink-0"></select>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 overflow-hidden">
+          <div id="activityLogList" class="divide-y divide-slate-100 dark:divide-slate-800"></div>
+        </div>
+      </div>
+
+      <footer class="text-center text-[11px] text-slate-400 dark:text-slate-600 pb-4 pt-8">
+        PaisaFlow AI is a product of TallyMarks Consulting (TMC) &middot; Demo environment &middot; All client data shown is illustrative
+      </footer>
+    </main>
+  </div>
+</div>
+
+<!-- ============ CLIENT DETAIL DRAWER ============ -->
+<div id="detailBackdrop" class="fixed inset-0 bg-slate-900/50 backdrop-layer opacity-0 pointer-events-none z-40" onclick="closeDetail()"></div>
+<aside id="detailDrawer" class="drawer drawer-closed fixed top-0 right-0 h-full w-full sm:w-[440px] bg-white dark:bg-slate-900 z-50 shadow-2xl overflow-y-auto">
+  <div id="detailContent"></div>
+</aside>
+
+<!-- ============ AI REMINDER GENERATOR MODAL ============ -->
+<div id="reminderBackdrop" class="fixed inset-0 bg-slate-900/60 backdrop-layer opacity-0 pointer-events-none z-40" onclick="closeReminder()"></div>
+<div id="reminderModalWrap" class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+  <div id="reminderModal" class="modal-pop modal-closed bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto pointer-events-auto">
+    <div id="reminderContent"></div>
+  </div>
+</div>
+
+<!-- ============ CHOOSE PAYMENT ACCOUNT MODAL ============ -->
+<div id="paymentAcctBackdrop" class="fixed inset-0 bg-slate-900/60 backdrop-layer opacity-0 pointer-events-none z-40" onclick="closePaymentAcctModal()"></div>
+<div id="paymentAcctModalWrap" class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+  <div id="paymentAcctModal" class="modal-pop modal-closed bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto pointer-events-auto">
+    <div id="paymentAcctContent"></div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toastContainer" class="fixed top-6 right-6 space-y-3 z-[100] w-[min(360px,90vw)]"></div>
+
+<!-- ============ AI ASSISTANT (CHAT + VOICE) ============ -->
+<button id="assistantBubble" class="fixed bottom-6 right-6 z-[90] w-14 h-14 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 shadow-2xl shadow-brand-600/30 flex items-center justify-center text-white hover:scale-105 transition-transform">
+  <svg id="assistantBubbleIcon" width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span id="assistantDot" class="hidden"></span>
+</button>
+
+<div id="assistantPanel" class="hidden fixed bottom-24 right-6 z-[95] w-[min(380px,92vw)] h-[min(560px,70vh)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden">
+  <div class="px-4 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-brand-500 to-brand-600 shrink-0">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="white"/></svg>
+      </div>
+      <div>
+        <p class="text-sm font-bold text-white leading-tight">AiNow Assistant</p>
+        <p class="text-[10px] text-brand-50 leading-tight">Ask, or tell me to do something</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-1">
+      <button id="assistantVoiceToggle" title="Toggle spoken replies" class="w-7 h-7 flex items-center justify-center rounded-full text-white/80 hover:bg-white/15 transition-colors">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M11 5L6 9H2v6h4l5 4V5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button id="assistantClose" class="w-7 h-7 flex items-center justify-center rounded-full text-white/80 hover:bg-white/15 transition-colors">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="assistantThread" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50 dark:bg-slate-950"></div>
+
+  <div class="p-3 border-t border-slate-100 dark:border-slate-800 shrink-0">
+    <div class="flex items-center justify-between mb-2">
+      <div class="segmented flex items-center gap-1">
+        <button id="langEnBtn" data-lang="en" class="lang-btn active px-2.5 py-1 rounded-full text-[10px] font-bold border border-slate-200 dark:border-slate-700 transition-colors">EN</button>
+        <button id="langUrBtn" data-lang="ur" class="lang-btn px-2.5 py-1 rounded-full text-[10px] font-bold border border-slate-200 dark:border-slate-700 transition-colors bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400">اردو</button>
+      </div>
+      <p id="assistantHint" class="text-[10px] text-slate-400 text-right">Try: "high risk clients" or "remind Al-Rehman Traders"</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="assistantMicBtn" title="Ask by voice" class="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" stroke="currentColor" stroke-width="2"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <input id="assistantInput" type="text" placeholder="Ask about clients, vendors, risk..." class="flex-1 px-3.5 py-2 text-sm rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500">
+      <button id="assistantSendBtn" class="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-brand-600 hover:bg-brand-700 text-white transition-colors">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   PAISAFLOW AI — MOCK DEMO ENGINE
+   Fully client-side simulation. No external calls. All "AI" is mocked.
+   ========================================================================= */
+
+// Fixed reference date so overdue math stays consistent for every demo run
+const TODAY = new Date('2026-07-10T00:00:00');
+const MARGIN_RECOVERY_RATE = 0.35; // assumed avg margin protected via timely AI-assisted collection
+
+// ---------------------------------------------------------------------------
+// MOCK DATA — CLIENTS
+// ---------------------------------------------------------------------------
+const clients = [
+  { id:'c1', name:'Al-Rehman Traders', city:'Lahore', sector:'Textile Wholesale', contact:'Mr. Tariq Mehmood', phone:'+92 300 1234567', email:'accounts@alrehmantraders.pk',
+    riskFactors:[
+      {label:'Historical Payment Delay', detail:'Average 18-day delay across the last 6 invoices', weight:38},
+      {label:'Sector Cash Cycle Volatility', detail:'Textile wholesale margins are sensitive to cotton price swings', weight:28},
+      {label:'AR Concentration', detail:'62% of this client\'s outstanding balance sits in a single overdue invoice', weight:18},
+    ]},
+  { id:'c2', name:'Karachi Logistics Co.', city:'Karachi', sector:'Freight & Logistics', contact:'Ms. Ayesha Khan', phone:'+92 321 2345678', email:'finance@karachilogistics.pk',
+    riskFactors:[
+      {label:'Historical Payment Delay', detail:'Average 4-day delay, consistently reliable', weight:14},
+      {label:'Sector Stability', detail:'Fixed monthly billing cycles typical of freight contracts', weight:8},
+    ]},
+  { id:'c3', name:'Punjab Organics', city:'Faisalabad', sector:'Organic Foods Export', contact:'Mr. Hassan Ali', phone:'+92 333 3456789', email:'accounts@punjaborganics.pk',
+    riskFactors:[
+      {label:'Seasonal Export Settlement', detail:'EU buyer FX transfers add delay during Q3 shipments', weight:24},
+      {label:'Historical Payment Delay', detail:'Average 9-day delay across past invoices', weight:20},
+      {label:'Relationship Tenure', detail:'New client relationship — only 8 months of payment history', weight:14},
+    ]},
+  { id:'c4', name:'Sindh Steel Corp', city:'Karachi', sector:'Steel & Hardware', contact:'Mr. Imran Sheikh', phone:'+92 301 4567890', email:'billing@sindhsteel.pk',
+    riskFactors:[
+      {label:'Historical Payment Delay', detail:'Average 25-day delay, trend worsening over last quarter', weight:36},
+      {label:'Commodity Price Volatility', detail:'Steel and scrap input costs fluctuating ~12% quarter-on-quarter', weight:33},
+      {label:'Post-Holiday Payment Lag', detail:'Consistent slowdowns in the weeks following Eid holidays', weight:20},
+    ]},
+  { id:'c5', name:'Lahore Pharma Distributors', city:'Lahore', sector:'Pharmaceutical Distribution', contact:'Ms. Sana Malik', phone:'+92 322 5678901', email:'accounts@lahorepharma.pk',
+    riskFactors:[
+      {label:'Historical Payment Delay', detail:'Average 2-day delay — excellent track record', weight:10},
+      {label:'Regulated Sector Stability', detail:'Pharma distribution carries predictable cash cycles', weight:5},
+    ]},
+  { id:'c6', name:'Faisalabad Textile Mills', city:'Faisalabad', sector:'Textile Manufacturing & Export', contact:'Mr. Waqas Ahmed', phone:'+92 302 6789012', email:'finance@ftm.pk',
+    riskFactors:[
+      {label:'Historical Payment Delay', detail:'20-day baseline delay, though recent invoices show improvement', weight:27},
+      {label:'Cotton Price Volatility', detail:'Yarn input cost swings affect this client\'s cash flow timing', weight:22},
+      {label:'Partial Payment Pattern', detail:'Last 2 invoices were settled in installments', weight:12},
+    ]},
+  { id:'c7', name:'Data Tech Solutions', city:'Islamabad', sector:'IT Services', contact:'Ms. Mahnoor Fatima', phone:'+92 345 7890123', email:'billing@datatech.pk',
+    riskFactors:[
+      {label:'Historical Payment Pattern', detail:'Typically pays 1–2 days ahead of schedule', weight:5},
+      {label:'Recurring Contract', detail:'Monthly retainer set up with auto-debit', weight:3},
+    ]},
+  { id:'c8', name:'Multan Rice Exporters', city:'Multan', sector:'Agricultural Export (Rice)', contact:'Mr. Faisal Chaudhry', phone:'+92 303 8901234', email:'accounts@multanrice.pk',
+    riskFactors:[
+      {label:'Historical Payment Delay', detail:'Average 14-day delay across past invoices', weight:34},
+      {label:'FBR Filing Season Cash Crunch', detail:'Advance income tax obligations due in September strain SME liquidity', weight:32},
+      {label:'Export Settlement Cycle', detail:'USD settlement and LC clearance typically adds a 7–10 day lag', weight:18},
+    ]},
+  { id:'c9', name:'Karachi Auto Parts', city:'Karachi', sector:'Auto Parts Distribution', contact:'Mr. Zeeshan Qureshi', phone:'+92 334 9012345', email:'accounts@kap.pk',
+    riskFactors:[
+      {label:'Historical Payment Delay', detail:'Average 10-day delay across past invoices', weight:20},
+      {label:'Import LC Dependency', detail:'Payment often waits on Letter of Credit clearance for imported parts', weight:17},
+      {label:'Currency Exposure', detail:'PKR/USD fluctuation affects this client\'s payment timing', weight:8},
+    ]},
+  { id:'c10', name:'Green Valley Foods', city:'Sialkot', sector:'FMCG Distribution', contact:'Ms. Rabia Yousaf', phone:'+92 311 0123456', email:'finance@greenvalley.pk',
+    riskFactors:[
+      {label:'Historical Payment Delay', detail:'Average 3-day delay — stable FMCG cash cycle', weight:12},
+      {label:'Sector Stability', detail:'Fast-moving consumer goods with steady turnover', weight:6},
+    ]},
+  { id:'c11', name:'Al-Noor Construction Supplies', city:'Rawalpindi', sector:'Construction Materials', contact:'Mr. Adnan Butt', phone:'+92 312 1122334', email:'accounts@alnoorconstruction.pk',
+    riskFactors:[
+      {label:'Historical Payment Delay', detail:'Average 35-day delay — longest in the portfolio', weight:37},
+      {label:'Contractor Release Dependency', detail:'Payments are tied to government project fund releases', weight:36},
+      {label:'AR Concentration', detail:'A single large invoice represents 80% of this client\'s outstanding balance', weight:18},
+    ]},
+  { id:'c12', name:'Chenab Textiles', city:'Faisalabad', sector:'Textile Export', contact:'Ms. Sadia Iqbal', phone:'+92 320 2233445', email:'billing@chenabtextiles.pk',
+    riskFactors:[
+      {label:'Historical Payment Delay', detail:'Consistently on-time across the last 10 invoices', weight:8},
+      {label:'Long-Standing Relationship', detail:'5+ year relationship with strong payment discipline', weight:4},
+    ]},
+];
+
+// ---------------------------------------------------------------------------
+// MOCK DATA — INVOICES (one outstanding invoice per client for this demo)
+// ---------------------------------------------------------------------------
+const invoices = [
+  { id:'i1',  invoiceNo:'INV-2026-0451', clientId:'c1',  amount:875000,  dueDate:'2026-06-18', reminderSent:false, reminderSentAt:null },
+  { id:'i2',  invoiceNo:'INV-2026-0512', clientId:'c2',  amount:320000,  dueDate:'2026-07-05', reminderSent:false, reminderSentAt:null },
+  { id:'i3',  invoiceNo:'INV-2026-0398', clientId:'c3',  amount:1150000, dueDate:'2026-06-28', reminderSent:false, reminderSentAt:null },
+  { id:'i4',  invoiceNo:'INV-2026-0367', clientId:'c4',  amount:2480000, dueDate:'2026-06-10', reminderSent:false, reminderSentAt:null },
+  { id:'i5',  invoiceNo:'INV-2026-0529', clientId:'c5',  amount:540000,  dueDate:'2026-07-07', reminderSent:false, reminderSentAt:null },
+  { id:'i6',  invoiceNo:'INV-2026-0410', clientId:'c6',  amount:1675000, dueDate:'2026-06-25', reminderSent:false, reminderSentAt:null },
+  { id:'i7',  invoiceNo:'INV-2026-0544', clientId:'c7',  amount:260000,  dueDate:'2026-07-15', reminderSent:false, reminderSentAt:null },
+  { id:'i8',  invoiceNo:'INV-2026-0382', clientId:'c8',  amount:1920000, dueDate:'2026-06-15', reminderSent:false, reminderSentAt:null },
+  { id:'i9',  invoiceNo:'INV-2026-0501', clientId:'c9',  amount:415000,  dueDate:'2026-07-02', reminderSent:false, reminderSentAt:null },
+  { id:'i10', invoiceNo:'INV-2026-0533', clientId:'c10', amount:298000,  dueDate:'2026-07-08', reminderSent:false, reminderSentAt:null },
+  { id:'i11', invoiceNo:'INV-2026-0341', clientId:'c11', amount:2150000, dueDate:'2026-05-31', reminderSent:false, reminderSentAt:null },
+  { id:'i12', invoiceNo:'INV-2026-0551', clientId:'c12', amount:610000,  dueDate:'2026-07-20', reminderSent:false, reminderSentAt:null },
+];
+
+const dsoTrend = [
+  { month:'Feb', value:45 }, { month:'Mar', value:42 }, { month:'Apr', value:38 },
+  { month:'May', value:34 }, { month:'Jun', value:30 }, { month:'Jul', value:28 },
+];
+
+// ---------------------------------------------------------------------------
+// MOCK DATA — VENDORS & BILLS PAYABLE (Accounts Payable)
+// ---------------------------------------------------------------------------
+const vendors = [
+  { id:'v1', name:'Sindh Cotton Ginners', category:'Raw Material', city:'Karachi', contact:'Mr. Farhan Baig', phone:'+92 300 5566778', email:'accounts@sindhcotton.pk' },
+  { id:'v2', name:'Faisal Dyes & Chemicals', category:'Dyeing Chemicals', city:'Faisalabad', contact:'Ms. Nida Aslam', phone:'+92 321 6677889', email:'billing@faisaldyes.pk' },
+  { id:'v3', name:'Punjab Packaging Co.', category:'Packaging', city:'Lahore', contact:'Mr. Kamran Sheikh', phone:'+92 302 7788990', email:'accounts@punjabpackaging.pk' },
+  { id:'v4', name:'Al-Hamd Logistics', category:'Freight & Transport', city:'Lahore', contact:'Mr. Bilal Ashraf', phone:'+92 333 8899001', email:'finance@alhamdlogistics.pk' },
+  { id:'v5', name:'Chenab Yarn Mills', category:'Yarn Supply', city:'Faisalabad', contact:'Ms. Areeba Khan', phone:'+92 304 9900112', email:'accounts@chenabyarn.pk' },
+  { id:'v6', name:'CityPower Utilities', category:'Utilities', city:'Karachi', contact:'Billing Department', phone:'+92 21 111222333', email:'billing@citypower.pk' },
+];
+
+const vendorBills = [
+  { id:'b1', billNo:'BILL-2026-2201', vendorId:'v1', amount:1450000, dueDate:'2026-07-05', discountPct:0, discountDeadline:null, scheduled:false },
+  { id:'b2', billNo:'BILL-2026-2202', vendorId:'v2', amount:320000, dueDate:'2026-07-18', discountPct:3, discountDeadline:'2026-07-13', scheduled:false },
+  { id:'b3', billNo:'BILL-2026-2203', vendorId:'v3', amount:185000, dueDate:'2026-07-22', discountPct:0, discountDeadline:null, scheduled:false },
+  { id:'b4', billNo:'BILL-2026-2204', vendorId:'v4', amount:265000, dueDate:'2026-07-09', discountPct:0, discountDeadline:null, scheduled:false },
+  { id:'b5', billNo:'BILL-2026-2205', vendorId:'v5', amount:980000, dueDate:'2026-07-16', discountPct:2, discountDeadline:'2026-07-12', scheduled:false },
+  { id:'b6', billNo:'BILL-2026-2206', vendorId:'v6', amount:142000, dueDate:'2026-07-08', discountPct:0, discountDeadline:null, scheduled:false },
+];
+
+function getVendor(id){ return vendors.find(v => v.id === id); }
+
+// ---------------------------------------------------------------------------
+// BUSINESS BANK ACCOUNTS
+// ---------------------------------------------------------------------------
+const bankAccounts = [
+  { id:'acc1', bank:'HBL', type:'Current Account', accountNo:'PK36 HABB 0000-1234-5678', balance: 3800000 },
+  { id:'acc2', bank:'Meezan Bank', type:'Business Account', accountNo:'PK21 MEZN 0000-5678-9012', balance: 1250000 },
+  { id:'acc3', bank:'UBL', type:'Current Account', accountNo:'PK94 UNIL 0000-9012-3456', balance: 620000 },
+  { id:'acc4', bank:'Bank Alfalah', type:'Current Account', accountNo:'PK58 ALFH 0000-3456-7890', balance: 5000000 },
+];
+
+function getBankAccount(id){ return bankAccounts.find(a => a.id === id); }
+function totalCashInBank(){ return bankAccounts.reduce((s,a) => s + a.balance, 0); }
+
+// AiNow's suggestion: the smallest account that can still fully cover the payment,
+// so larger reserve accounts stay free for bigger upcoming obligations.
+function suggestBankAccount(amount){
+  const sufficient = bankAccounts.filter(a => a.balance >= amount).sort((a,b) => a.balance - b.balance);
+  if (sufficient.length){
+    return { ok:true, account: sufficient[0], remaining: sufficient[0].balance - amount };
+  }
+  const sorted = [...bankAccounts].sort((a,b) => b.balance - a.balance);
+  return { ok:false, account: sorted[0], shortfall: amount - sorted[0].balance };
+}
+
+function maskAccountNo(accountNo){
+  const parts = accountNo.split('-');
+  return '•••• ' + parts[parts.length - 1];
+}
+
+// ---------------------------------------------------------------------------
+// ACTIVITY LOG (seeded, then appended to live as reminders/payments happen)
+// ---------------------------------------------------------------------------
+let activityLog = [
+  // --- Faisalabad Textile Mills (c6) — 3 rounds ---
+  { id:'a1', type:'reminder_sent', time: Date.now() - 3600000*5, title:'Reminder sent to Faisalabad Textile Mills', detail:'Professional tone, English, via Email', clientId:'c6' },
+  { id:'a2', type:'reminder_response', time: Date.now() - 3600000*4.5, title:'Faisalabad Textile Mills replied', detail:'"Payment will be processed by end of this week, thank you for the reminder."', clientId:'c6' },
+  { id:'a5', type:'reminder_sent', time: Date.now() - 3600000*24*5, title:'Reminder sent to Faisalabad Textile Mills', detail:'Firm tone, English, via WhatsApp', clientId:'c6' },
+  { id:'a6', type:'reminder_response', time: Date.now() - 3600000*24*5 + 3600000*2, title:'Faisalabad Textile Mills replied', detail:'"Sorry for the delay, will clear half now and the rest next week."', clientId:'c6' },
+  { id:'a7', type:'reminder_sent', time: Date.now() - 3600000*24*11, title:'Reminder sent to Faisalabad Textile Mills', detail:'Polite tone, English, via Email', clientId:'c6' },
+  { id:'a8', type:'reminder_response', time: Date.now() - 3600000*24*11 + 3600000*5, title:'Faisalabad Textile Mills replied', detail:'"Noted, processing now."', clientId:'c6' },
+
+  // --- Al-Rehman Traders (c1) — High risk, 3 rounds, escalating tone ---
+  { id:'a9', type:'reminder_sent', time: Date.now() - 3600000*24*12, title:'Reminder sent to Al-Rehman Traders', detail:'Polite tone, Roman Urdu, via WhatsApp', clientId:'c1' },
+  { id:'a10', type:'reminder_response', time: Date.now() - 3600000*24*12 + 3600000*3, title:'Al-Rehman Traders replied', detail:'"Bhai thori mohlat de dein, agle hafte clear kar denge."', clientId:'c1' },
+  { id:'a11', type:'reminder_sent', time: Date.now() - 3600000*24*6, title:'Reminder sent to Al-Rehman Traders', detail:'Firm tone, English, via WhatsApp', clientId:'c1' },
+  { id:'a12', type:'reminder_response', time: Date.now() - 3600000*24*6 + 3600000*5, title:'Al-Rehman Traders replied', detail:'"Sorry for the delay, will transfer 50% by Friday and the rest next week."', clientId:'c1' },
+  { id:'a13', type:'reminder_sent', time: Date.now() - 3600000*24, title:'Reminder sent to Al-Rehman Traders', detail:'Professional tone, English, via Email', clientId:'c1' },
+  { id:'a14', type:'reminder_response', time: Date.now() - 3600000*23, title:'Al-Rehman Traders replied', detail:'"Noted. Processing partial payment today, will confirm once done."', clientId:'c1' },
+
+  // --- Sindh Steel Corp (c4) — High risk, 3 rounds ---
+  { id:'a15', type:'reminder_sent', time: Date.now() - 3600000*24*15, title:'Reminder sent to Sindh Steel Corp', detail:'Polite tone, English, via Email', clientId:'c4' },
+  { id:'a16', type:'reminder_response', time: Date.now() - 3600000*24*15 + 3600000*4, title:'Sindh Steel Corp replied', detail:'"Thank you for reaching out, we are reviewing our payment schedule."', clientId:'c4' },
+  { id:'a17', type:'reminder_sent', time: Date.now() - 3600000*24*8, title:'Reminder sent to Sindh Steel Corp', detail:'Firm tone, English, via WhatsApp', clientId:'c4' },
+  { id:'a18', type:'reminder_response', time: Date.now() - 3600000*24*8 + 3600000*2, title:'Sindh Steel Corp replied', detail:'"Cash flow is tight this month due to scrap price hikes — can we get 10 more days?"', clientId:'c4' },
+  { id:'a19', type:'reminder_sent', time: Date.now() - 3600000*24*2, title:'Reminder sent to Sindh Steel Corp', detail:'Professional tone, English, via WhatsApp', clientId:'c4' },
+  { id:'a20', type:'reminder_response', time: Date.now() - 3600000*24*2 + 3600000*6, title:'Sindh Steel Corp replied', detail:'"Management is reviewing, will revert by end of week."', clientId:'c4' },
+
+  // --- Al-Noor Construction Supplies (c11) — worst client, 3 rounds, last one unanswered ---
+  { id:'a21', type:'reminder_sent', time: Date.now() - 3600000*24*21, title:'Reminder sent to Al-Noor Construction Supplies', detail:'Polite tone, English, via Email', clientId:'c11' },
+  { id:'a22', type:'reminder_response', time: Date.now() - 3600000*24*20, title:'Al-Noor Construction Supplies replied', detail:'"Our payment is pending release from the contractor, will update soon."', clientId:'c11' },
+  { id:'a23', type:'reminder_sent', time: Date.now() - 3600000*24*11, title:'Reminder sent to Al-Noor Construction Supplies', detail:'Firm tone, English, via WhatsApp', clientId:'c11' },
+  { id:'a24', type:'reminder_response', time: Date.now() - 3600000*24*11 + 3600000*8, title:'Al-Noor Construction Supplies replied', detail:'"Government project funds have not been released to us yet, apologies for the delay."', clientId:'c11' },
+  { id:'a25', type:'reminder_sent', time: Date.now() - 3600000*24*4, title:'Reminder sent to Al-Noor Construction Supplies', detail:'Professional tone, English, via Email', clientId:'c11' },
+
+  // --- Punjab Organics (c3) — Medium risk, 1 round ---
+  { id:'a26', type:'reminder_sent', time: Date.now() - 3600000*24*7, title:'Reminder sent to Punjab Organics', detail:'Polite tone, English, via WhatsApp', clientId:'c3' },
+  { id:'a27', type:'reminder_response', time: Date.now() - 3600000*24*7 + 3600000*2, title:'Punjab Organics replied', detail:'"Thanks for the update — payment will be released once our EU buyer settlement clears, expected next week."', clientId:'c3' },
+
+  // --- Karachi Auto Parts (c9) — Medium risk, 1 round ---
+  { id:'a28', type:'reminder_sent', time: Date.now() - 3600000*24*5, title:'Reminder sent to Karachi Auto Parts', detail:'Polite tone, English, via Email', clientId:'c9' },
+  { id:'a29', type:'reminder_response', time: Date.now() - 3600000*24*5 + 3600000*3, title:'Karachi Auto Parts replied', detail:'"Our LC clearance is delayed at the bank, should be resolved in 3-4 days."', clientId:'c9' },
+
+  // --- Karachi Logistics Co. (c2) — Low risk, smooth quick payer ---
+  { id:'a30', type:'reminder_sent', time: Date.now() - 3600000*24*9, title:'Reminder sent to Karachi Logistics Co.', detail:'Polite tone, English, via WhatsApp', clientId:'c2' },
+  { id:'a31', type:'reminder_response', time: Date.now() - 3600000*24*9 + 3600000, title:'Karachi Logistics Co. replied', detail:'"Payment already processed yesterday, please confirm receipt."', clientId:'c2' },
+
+  // --- Multan Rice Exporters (c8) — 2 rounds ---
+  { id:'a32', type:'reminder_sent', time: Date.now() - 3600000*24*18, title:'Reminder sent to Multan Rice Exporters', detail:'Polite tone, English, via Email', clientId:'c8' },
+  { id:'a33', type:'reminder_response', time: Date.now() - 3600000*24*18 + 3600000*4, title:'Multan Rice Exporters replied', detail:'"Acknowledged, processing payment for this invoice."', clientId:'c8' },
+  { id:'a4', type:'reminder_sent', time: Date.now() - 3600000*30, title:'Reminder sent to Multan Rice Exporters', detail:'Firm tone, Roman Urdu, via WhatsApp', clientId:'c8' },
+  { id:'a34', type:'reminder_response', time: Date.now() - 3600000*25, title:'Multan Rice Exporters replied', detail:'"Theek hai bhai, jald hi clear kar dete hain, FBR ki wajah se thora late ho raha hai."', clientId:'c8' },
+
+  // --- Al-Hamd Logistics (v4) — 2 rounds ---
+  { id:'a35', type:'payment_scheduled', time: Date.now() - 3600000*24*14, title:'Payment scheduled to Al-Hamd Logistics', detail:'PKR 240,000 scheduled via AiNow Payments Gateway', vendorId:'v4' },
+  { id:'a36', type:'payment_response', time: Date.now() - 3600000*24*14 + 3600000*2, title:'Al-Hamd Logistics replied', detail:'"Payment confirmed and reconciled."', vendorId:'v4' },
+  { id:'a3', type:'payment_scheduled', time: Date.now() - 3600000*20, title:'Payment scheduled to Al-Hamd Logistics', detail:'PKR 265,000 scheduled via AiNow Payments Gateway', vendorId:'v4' },
+  { id:'a37', type:'payment_response', time: Date.now() - 3600000*15, title:'Al-Hamd Logistics replied', detail:'"Received, processing on our end within 2 business days."', vendorId:'v4' },
+
+  // --- Faisal Dyes & Chemicals (v2) — 1 round ---
+  { id:'a38', type:'payment_scheduled', time: Date.now() - 3600000*24*16, title:'Payment scheduled to Faisal Dyes & Chemicals', detail:'PKR 305,000 scheduled via AiNow Payments Gateway', vendorId:'v2' },
+  { id:'a39', type:'payment_response', time: Date.now() - 3600000*24*16 + 3600000*3, title:'Faisal Dyes & Chemicals replied', detail:'"Payment received, thank you for the prompt settlement."', vendorId:'v2' },
+
+  // --- Chenab Yarn Mills (v5) — 2 rounds ---
+  { id:'a40', type:'payment_scheduled', time: Date.now() - 3600000*24*10, title:'Payment scheduled to Chenab Yarn Mills', detail:'PKR 940,000 scheduled via AiNow Payments Gateway', vendorId:'v5' },
+  { id:'a41', type:'payment_response', time: Date.now() - 3600000*24*10 + 3600000*5, title:'Chenab Yarn Mills replied', detail:'"Confirmed receipt, invoice marked as paid on our end."', vendorId:'v5' },
+  { id:'a42', type:'payment_scheduled', time: Date.now() - 3600000*24*3, title:'Payment scheduled to Chenab Yarn Mills', detail:'PKR 980,000 scheduled via AiNow Payments Gateway', vendorId:'v5' },
+  { id:'a43', type:'payment_response', time: Date.now() - 3600000*24*3 + 3600000*4, title:'Chenab Yarn Mills replied', detail:'"Received, will process on our end. Thank you."', vendorId:'v5' },
+
+  // --- CityPower Utilities (v6) — 1 round ---
+  { id:'a44', type:'payment_scheduled', time: Date.now() - 3600000*24*13, title:'Payment scheduled to CityPower Utilities', detail:'PKR 138,000 scheduled via AiNow Payments Gateway', vendorId:'v6' },
+  { id:'a45', type:'payment_response', time: Date.now() - 3600000*24*13 + 3600000, title:'CityPower Utilities replied', detail:'"Payment confirmed, account is now current."', vendorId:'v6' },
+];
+
+let activeRiskFilter = 'All';
+let searchTerm = '';
+
+// ---------------------------------------------------------------------------
+// HELPERS
+// ---------------------------------------------------------------------------
+function getClient(id){ return clients.find(c => c.id === id); }
+
+function formatPKR(num){
+  num = Math.round(num);
+  const neg = num < 0; num = Math.abs(num);
+  const str = String(num);
+  const lastThree = str.length > 3 ? str.slice(-3) : str;
+  const other = str.length > 3 ? str.slice(0, -3) : '';
+  const grouped = other ? other.replace(/\B(?=(\d{2})+(?!\d)$)/g, ',') + ',' + lastThree : lastThree;
+  return (neg ? '-' : '') + grouped;
+}
+
+function formatPKRCompact(num){
+  return (num / 1000000).toFixed(2) + ' Million';
+}
+
+function formatDate(d){
+  const date = new Date(d + 'T00:00:00');
+  return date.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function dayDiff(dueDate){
+  const due = new Date(dueDate + 'T00:00:00');
+  return Math.round((TODAY - due) / 86400000); // positive = overdue, negative = not yet due
+}
+
+function riskScore(client){
+  return client.riskFactors.reduce((sum, f) => sum + f.weight, 0);
+}
+
+function riskLevel(score){
+  if (score >= 70) return 'High';
+  if (score >= 40) return 'Medium';
+  return 'Low';
+}
+
+function riskColors(level){
+  if (level === 'High')   return { bg:'bg-rose-50 dark:bg-rose-500/10', text:'text-rose-700 dark:text-rose-400', dot:'bg-rose-500', ring:'ring-rose-200 dark:ring-rose-500/20' };
+  if (level === 'Medium') return { bg:'bg-amber-50 dark:bg-amber-500/10', text:'text-amber-700 dark:text-amber-400', dot:'bg-amber-500', ring:'ring-amber-200 dark:ring-amber-500/20' };
+  return { bg:'bg-emerald-50 dark:bg-emerald-500/10', text:'text-emerald-700 dark:text-emerald-400', dot:'bg-emerald-500', ring:'ring-emerald-200 dark:ring-emerald-500/20' };
+}
+
+function initials(name){
+  return name.split(' ').filter(w => w[0] === w[0].toUpperCase()).slice(0,2).map(w => w[0]).join('').slice(0,2) || name.slice(0,2).toUpperCase();
+}
+
+// ---------------------------------------------------------------------------
+// AI REMINDER MESSAGE TEMPLATES (mocked locally — no external API)
+// ---------------------------------------------------------------------------
+function buildReminderMessage(client, invoice, tone, lang){
+  const amount = formatPKR(invoice.amount);
+  const diff = dayDiff(invoice.dueDate);
+  const days = Math.abs(diff);
+  const dueDateStr = formatDate(invoice.dueDate);
+  const name = client.name;
+  const invNo = invoice.invoiceNo;
+
+  const templates = {
+    English: {
+      Polite: `Dear ${name},\n\nWe hope you're doing well. This is a gentle reminder that invoice ${invNo} for PKR ${amount} was due on ${dueDateStr}. We'd really appreciate it if you could arrange the payment at your earliest convenience.\n\nPlease let us know if you have any questions — thank you for your continued partnership!`,
+      Firm: `Dear ${name},\n\nInvoice ${invNo} for PKR ${amount} is now ${days} day(s) overdue (due ${dueDateStr}). We request immediate settlement of this outstanding amount to avoid any disruption to your account or future orders.\n\nPlease process payment within 48 hours.`,
+      Professional: `Dear ${name},\n\nThis is to formally notify you that invoice ${invNo}, amounting to PKR ${amount}, remains unpaid as of ${dueDateStr}. Kindly arrange settlement at your earliest convenience and share the payment confirmation for our records.\n\nWe value our business relationship and appreciate your prompt attention to this matter.`
+    },
+    RomanUrdu: {
+      Polite: `Assalam-o-Alaikum ${name},\n\nUmeed hai aap khairiat se honge. Yeh ek dosti se yaad dahani hai keh invoice ${invNo} (PKR ${amount}) ki payment ${dueDateStr} ko due thi. Agar mumkin ho to jald payment arrange kar dein.\n\nShukriya, aapke business ke liye tahe-dil se shukriya!`,
+      Firm: `Assalam-o-Alaikum ${name},\n\nInvoice ${invNo} (PKR ${amount}) ab ${days} din se overdue ho chuki hai. Barah-e-meherbani 48 ghanton ke andar payment clear karein takeh account par koi asar na ho.\n\nUmeed hai aap jald respond karenge.`,
+      Professional: `Assalam-o-Alaikum ${name},\n\nHum aapko agah karna chahte hain keh invoice ${invNo}, jiski raqam PKR ${amount} hai, ab tak clear nahi hui. Barah-e-karam jald az jald payment arrange karein aur confirmation share karein.\n\nAapke business taalluq ka shukriya.`
+    },
+    UrduScript: {
+      Polite: `السلام علیکم ${name}،\n\nامید ہے آپ خیریت سے ہوں گے۔ یہ ایک نرم یاد دہانی ہے کہ انوائس ${invNo} کی رقم PKR ${amount} کی ادائیگی ${dueDateStr} کو واجب الادا تھی۔ براہ کرم جلد از جلد ادائیگی کا بندوبست کریں۔\n\nآپ کے مسلسل تعاون کا شکریہ۔`,
+      Firm: `السلام علیکم ${name}،\n\nانوائس ${invNo} کی رقم PKR ${amount} اب ${days} دن سے واجب الادا ہے۔ براہ کرم 48 گھنٹوں کے اندر ادائیگی کریں تاکہ آپ کے اکاؤنٹ پر کوئی اثر نہ پڑے۔\n\nامید ہے آپ جلد جواب دیں گے۔`,
+      Professional: `السلام علیکم ${name}،\n\nیہ آپ کو باضابطہ طور پر مطلع کرنے کے لیے ہے کہ انوائس ${invNo}، جس کی رقم PKR ${amount} ہے، تاحال ادا نہیں ہوئی۔ براہ کرم جلد ادائیگی کا بندوبست کریں اور ادائیگی کی تصدیق شیئر کریں۔\n\nآپ کے کاروباری تعلق کی قدر کرتے ہیں۔`
+    }
+  };
+  return templates[lang][tone];
+}
+
+// ---------------------------------------------------------------------------
+// KPI RENDERING
+// ---------------------------------------------------------------------------
+function renderKPIs(){
+  const totalOutstanding = invoices.reduce((s,i) => s + i.amount, 0);
+  const atRisk = invoices.filter(inv => riskLevel(riskScore(getClient(inv.clientId))) !== 'Low');
+  const highCount = invoices.filter(inv => riskLevel(riskScore(getClient(inv.clientId))) === 'High').length;
+  const medCount = invoices.filter(inv => riskLevel(riskScore(getClient(inv.clientId))) === 'Medium').length;
+  const marginProtected = atRisk.reduce((s,i) => s + i.amount, 0) * MARGIN_RECOVERY_RATE;
+
+  const cards = [
+    {
+      label: 'Total Outstanding Receivables', value: 'PKR ' + formatPKRCompact(totalOutstanding),
+      sub: `Across ${clients.length} active clients`,
+      icon: `<path d="M3 6h18v12H3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M3 10h18" stroke="currentColor" stroke-width="2"/><circle cx="7" cy="15" r="1" fill="currentColor"/>`,
+      color:'brand'
+    },
+    {
+      label: 'Avg. Collection Period (DSO)', value: '28 days',
+      sub: `<span class="text-emerald-600 dark:text-emerald-400 font-semibold">↓ 38%</span> vs. 45 days pre-AiNow`,
+      icon: `<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`,
+      color:'slate'
+    },
+    {
+      label: 'At-Risk Invoices', value: String(atRisk.length),
+      sub: `${highCount} high &middot; ${medCount} medium risk`,
+      icon: `<path d="M12 2L1 21h22L12 2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v5M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`,
+      color:'rose'
+    },
+    {
+      label: 'Est. Margin Protected (Qtr)', value: 'PKR ' + formatPKRCompact(marginProtected),
+      sub: `35% avg. recovery on ${atRisk.length} flagged invoices`,
+      icon: `<path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
+      color:'emerald'
+    },
+  ];
+
+  const colorMap = {
+    brand:  'bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400',
+    slate:  'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300',
+    rose:   'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400',
+    emerald:'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  };
+
+  document.getElementById('kpiRow').innerHTML = cards.map(c => `
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 p-5 hover:shadow-card transition-shadow duration-300">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center ${colorMap[c.color]}">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none">${c.icon}</svg>
+        </div>
+      </div>
+      <p class="font-display font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight">${c.value}</p>
+      <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">${c.label}</p>
+      <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">${c.sub}</p>
+    </div>
+  `).join('');
+}
+
+// ---------------------------------------------------------------------------
+// DSO TREND CHART (inline SVG line/area)
+// ---------------------------------------------------------------------------
+function renderDSOChart(){
+  const w = 560, h = 170, pad = 28;
+  const max = 50, min = 20;
+  const stepX = (w - pad*2) / (dsoTrend.length - 1);
+  const points = dsoTrend.map((d,i) => {
+    const x = pad + i*stepX;
+    const y = h - pad - ((d.value - min)/(max-min)) * (h - pad*2 - 10);
+    return { x, y, ...d };
+  });
+  const linePath = points.map((p,i) => (i===0?'M':'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+  const areaPath = linePath + ` L${points[points.length-1].x.toFixed(1)},${h-pad} L${points[0].x.toFixed(1)},${h-pad} Z`;
+
+  const dots = points.map((p,i) => `
+    <circle cx="${p.x}" cy="${p.y}" r="${i===points.length-1?5:3.5}" fill="${i===points.length-1?'#157a49':'#ffffff'}" stroke="#157a49" stroke-width="2"/>
+    <text x="${p.x}" y="${h-6}" text-anchor="middle" font-size="10" fill="#94a3b8" font-family="Inter, sans-serif">${p.month}</text>
+    <text x="${p.x}" y="${p.y-10}" text-anchor="middle" font-size="10.5" font-weight="600" fill="${i===points.length-1?'#157a49':'#64748b'}" font-family="Inter, sans-serif">${p.value}d</text>
+  `).join('');
+
+  document.getElementById('dsoChart').innerHTML = `
+    <svg viewBox="0 0 ${w} ${h}" class="w-full h-auto">
+      <defs>
+        <linearGradient id="dsoGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4dbf82" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#4dbf82" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="${areaPath}" fill="url(#dsoGrad)"/>
+      <path d="${linePath}" fill="none" stroke="#157a49" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      ${dots}
+    </svg>
+  `;
+}
+
+// ---------------------------------------------------------------------------
+// RISK DONUT (CSS conic-gradient)
+// ---------------------------------------------------------------------------
+function renderRiskDonut(){
+  const levels = invoices.map(inv => riskLevel(riskScore(getClient(inv.clientId))));
+  const high = levels.filter(l=>l==='High').length;
+  const med = levels.filter(l=>l==='Medium').length;
+  const low = levels.filter(l=>l==='Low').length;
+  const total = levels.length;
+  const p1 = (high/total)*360;
+  const p2 = p1 + (med/total)*360;
+
+  document.getElementById('riskDonut').innerHTML = `
+    <div class="relative w-28 h-28 shrink-0 rounded-full" style="background: conic-gradient(#e11d48 0deg ${p1}deg, #f59e0b ${p1}deg ${p2}deg, #10b981 ${p2}deg 360deg);">
+      <div class="absolute inset-2 rounded-full bg-white dark:bg-slate-900 flex flex-col items-center justify-center">
+        <span class="font-display font-extrabold text-lg text-slate-800 dark:text-white">${total}</span>
+        <span class="text-[9px] text-slate-400">invoices</span>
+      </div>
+    </div>
+    <div class="space-y-2 text-xs flex-1">
+      <div class="flex items-center justify-between"><span class="flex items-center gap-2 text-slate-600 dark:text-slate-300"><span class="w-2 h-2 rounded-full bg-rose-500"></span>High</span><span class="font-semibold text-slate-800 dark:text-white">${high}</span></div>
+      <div class="flex items-center justify-between"><span class="flex items-center gap-2 text-slate-600 dark:text-slate-300"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Medium</span><span class="font-semibold text-slate-800 dark:text-white">${med}</span></div>
+      <div class="flex items-center justify-between"><span class="flex items-center gap-2 text-slate-600 dark:text-slate-300"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Low</span><span class="font-semibold text-slate-800 dark:text-white">${low}</span></div>
+    </div>
+  `;
+}
+
+// ---------------------------------------------------------------------------
+// INVOICE TABLE
+// ---------------------------------------------------------------------------
+function renderRiskFilters(){
+  const counts = { All: invoices.length, High:0, Medium:0, Low:0 };
+  invoices.forEach(inv => counts[riskLevel(riskScore(getClient(inv.clientId)))]++);
+  const opts = ['All','High','Medium','Low'];
+  document.getElementById('riskFilters').innerHTML = opts.map(o => `
+    <button data-filter="${o}" class="filter-chip px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${activeRiskFilter===o
+      ? 'bg-slate-900 dark:bg-brand-500 text-white dark:text-slate-900 border-slate-900 dark:border-brand-500'
+      : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300'}">
+      ${o} <span class="opacity-70">${counts[o]}</span>
+    </button>
+  `).join('');
+  document.querySelectorAll('.filter-chip').forEach(btn => {
+    btn.addEventListener('click', () => { activeRiskFilter = btn.dataset.filter; renderAll(); });
+  });
+}
+
+function renderTable(){
+  const term = searchTerm.trim().toLowerCase();
+  const rows = invoices.filter(inv => {
+    const client = getClient(inv.clientId);
+    const level = riskLevel(riskScore(client));
+    if (activeRiskFilter !== 'All' && level !== activeRiskFilter) return false;
+    if (term && !(client.name.toLowerCase().includes(term) || inv.invoiceNo.toLowerCase().includes(term))) return false;
+    return true;
+  });
+
+  document.getElementById('tableSummary').textContent = `Showing ${rows.length} of ${invoices.length} outstanding invoices`;
+
+  document.getElementById('invoiceTableBody').innerHTML = rows.map(inv => {
+    const client = getClient(inv.clientId);
+    const score = riskScore(client);
+    const level = riskLevel(score);
+    const colors = riskColors(level);
+    const diff = dayDiff(inv.dueDate);
+    const dueTag = diff > 0
+      ? `<span class="text-rose-500 dark:text-rose-400 text-[11px]">${diff} day${diff>1?'s':''} overdue</span>`
+      : `<span class="text-slate-400 text-[11px]">due in ${Math.abs(diff)} day${Math.abs(diff)!==1?'s':''}</span>`;
+
+    return `
+      <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors group" onclick="openDetail('${client.id}')">
+        <td class="px-6 py-4 font-mono text-xs text-slate-500 dark:text-slate-400">${inv.invoiceNo}</td>
+        <td class="px-3 py-4">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[11px] font-bold text-slate-500 dark:text-slate-300 shrink-0">${initials(client.name)}</div>
+            <div>
+              <p class="text-sm font-semibold text-slate-800 dark:text-white leading-tight">${client.name}</p>
+              <p class="text-[11px] text-slate-400 leading-tight">${client.city} &middot; ${client.sector}</p>
+            </div>
+          </div>
+        </td>
+        <td class="px-3 py-4 font-mono text-sm font-semibold text-slate-800 dark:text-white">PKR ${formatPKR(inv.amount)}</td>
+        <td class="px-3 py-4">
+          <p class="text-sm text-slate-600 dark:text-slate-300">${formatDate(inv.dueDate)}</p>
+          ${dueTag}
+        </td>
+        <td class="px-3 py-4">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ring-1 ${colors.bg} ${colors.text} ${colors.ring}">
+            <span class="w-1.5 h-1.5 rounded-full ${colors.dot} ${level==='High'?'risk-chip-high':''}"></span>
+            ${level} &middot; ${score}%
+          </span>
+        </td>
+        <td class="px-6 py-4 text-right">
+          <div class="flex items-center justify-end gap-2">
+            ${inv.reminderSent ? `<span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium hidden sm:inline">✓ Reminded</span>` : ''}
+            <button onclick="event.stopPropagation(); openReminder('${inv.id}')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white transition-colors flex items-center gap-1.5">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              ${inv.reminderSent ? 'Remind Again' : 'Remind'}
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('') || `<tr><td colspan="6" class="text-center py-12 text-sm text-slate-400">No invoices match your filters.</td></tr>`;
+}
+
+function renderAll(){
+  renderNetCashBanner();
+  renderKPIs();
+  renderAPKPIs('apKpiRowDashboard');
+  renderDSOChart();
+  renderRiskDonut();
+  renderRiskFilters();
+  renderTable();
+}
+
+// ---------------------------------------------------------------------------
+// CLIENT DETAIL DRAWER
+// ---------------------------------------------------------------------------
+function renderEntityHistoryThread(entityType, entityId){
+  const outgoingTypes = ['reminder_sent', 'payment_scheduled'];
+  const incomingTypes = ['reminder_response', 'payment_response'];
+  const idField = entityType === 'client' ? 'clientId' : 'vendorId';
+
+  const history = activityLog.filter(a => a[idField] === entityId && (outgoingTypes.includes(a.type) || incomingTypes.includes(a.type))).sort((a,b) => a.time - b.time);
+
+  if (!history.length){
+    const noun = entityType === 'client' ? 'reminders' : 'payment messages';
+    return `<p class="text-xs text-slate-400 py-2">No ${noun} sent yet — every message and reply will build up here over time, just like a WhatsApp chat.</p>`;
+  }
+
+  return `<div class="whatsapp-thread-bg rounded-xl p-3 space-y-2">` + history.map(a => {
+    const isOutgoing = outgoingTypes.includes(a.type);
+    const senderLabel = isOutgoing ? 'You (via AiNow)' : a.title.replace(' replied','').replace('Payment scheduled to ','');
+    return `
+      <div class="flex ${isOutgoing ? 'justify-end' : 'justify-start'}">
+        <div class="relative max-w-[85%] ${isOutgoing ? 'bg-[#d9fdd3] dark:bg-emerald-700 text-slate-800 dark:text-white rounded-tr-sm' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-100 rounded-tl-sm'} rounded-2xl px-3.5 py-2 shadow-sm">
+          <p class="text-[10px] font-semibold ${isOutgoing ? 'text-emerald-800 dark:text-emerald-100' : 'text-slate-400 dark:text-slate-300'} mb-0.5">${senderLabel}</p>
+          <p class="text-xs leading-snug">${a.detail}</p>
+          <p class="text-[10px] ${isOutgoing ? 'text-emerald-800/70 dark:text-emerald-100/70' : 'text-slate-400'} mt-1 text-right">${timeAgo(a.time)}${isOutgoing ? ' <span class="text-sky-500">&#10003;&#10003;</span>' : ''}</p>
+        </div>
+      </div>
+    `;
+  }).join('') + `</div>`;
+}
+
+function openDetail(clientId){
+  const client = getClient(clientId);
+  const clientInvoices = invoices.filter(i => i.clientId === clientId);
+  const score = riskScore(client);
+  const level = riskLevel(score);
+  const colors = riskColors(level);
+  const totalDue = clientInvoices.reduce((s,i)=>s+i.amount,0);
+
+  document.getElementById('detailContent').dataset.clientId = clientId;
+  document.getElementById('detailContent').dataset.vendorId = '';
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 dark:from-brand-400 dark:to-brand-600 flex items-center justify-center text-white font-bold">${initials(client.name)}</div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white leading-tight">${client.name}</h3>
+          <p class="text-xs text-slate-400">${client.city} &middot; ${client.sector}</p>
+        </div>
+      </div>
+      <button onclick="closeDetail()" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="p-6 space-y-6">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3.5">
+          <p class="text-[11px] text-slate-400 mb-1">Outstanding Balance</p>
+          <p class="font-display font-bold text-slate-800 dark:text-white">PKR ${formatPKR(totalDue)}</p>
+        </div>
+        <div class="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3.5">
+          <p class="text-[11px] text-slate-400 mb-1">AI Risk Status</p>
+          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold ${colors.bg} ${colors.text}"><span class="w-1.5 h-1.5 rounded-full ${colors.dot}"></span>${level} &middot; ${score}%</span>
+        </div>
+      </div>
+
+      <div>
+        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Contact</p>
+        <div class="space-y-1.5 text-sm text-slate-600 dark:text-slate-300">
+          <p class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-slate-400"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>${client.contact}</p>
+          <p class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-slate-400"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" stroke="currentColor" stroke-width="2"/></svg>${client.phone}</p>
+          <p class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-slate-400"><path d="M4 4h16v16H4z" stroke="currentColor" stroke-width="2"/><path d="M22 6l-10 7L2 6" stroke="currentColor" stroke-width="2"/></svg>${client.email}</p>
+        </div>
+      </div>
+
+      <div>
+        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Outstanding Invoices</p>
+        <div class="space-y-2">
+          ${clientInvoices.map(inv => {
+            const diff = dayDiff(inv.dueDate);
+            return `
+            <div class="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+              <div>
+                <p class="text-sm font-mono font-semibold text-slate-700 dark:text-slate-200">${inv.invoiceNo}</p>
+                <p class="text-[11px] text-slate-400">${diff>0? diff+' days overdue' : 'due in '+Math.abs(diff)+' days'}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-semibold text-slate-800 dark:text-white">PKR ${formatPKR(inv.amount)}</p>
+                <button onclick="openReminder('${inv.id}')" class="text-[11px] font-semibold text-brand-600 dark:text-brand-400 hover:underline">Generate reminder →</button>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Payment Communication History</p>
+          <span class="text-[10px] text-slate-400">${activityLog.filter(a=>a.clientId===client.id).length} logged event(s)</span>
+        </div>
+        <div class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+          ${renderEntityHistoryThread('client', client.id)}
+        </div>
+      </div>
+
+      <div>
+        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Why AiNow flagged this client</p>
+        <div class="space-y-3">
+          ${client.riskFactors.map(f => `
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <p class="text-xs font-medium text-slate-600 dark:text-slate-300">${f.label}</p>
+                <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">${f.weight}%</p>
+              </div>
+              <div class="h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                <div class="h-full rounded-full ${level==='High'?'bg-rose-500':level==='Medium'?'bg-amber-500':'bg-emerald-500'}" style="width:${Math.min(100,f.weight*2.2)}%"></div>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">${f.detail}</p>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('detailBackdrop').classList.remove('opacity-0','pointer-events-none');
+  document.getElementById('detailDrawer').classList.remove('drawer-closed');
+}
+
+function closeDetail(){
+  document.getElementById('detailBackdrop').classList.add('opacity-0','pointer-events-none');
+  document.getElementById('detailDrawer').classList.add('drawer-closed');
+}
+
+// ---------------------------------------------------------------------------
+// PREDICTIVE ANALYTICS VIEW
+// ---------------------------------------------------------------------------
+function renderAnalyticsView(){
+  const sorted = [...clients].sort((a,b) => riskScore(b) - riskScore(a));
+  document.getElementById('analyticsGrid').innerHTML = sorted.map(client => {
+    const score = riskScore(client);
+    const level = riskLevel(score);
+    const colors = riskColors(level);
+    return `
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 p-5">
+      <div class="flex items-center justify-between mb-4 gap-2">
+        <div class="min-w-0">
+          <p class="text-sm font-semibold text-slate-800 dark:text-white truncate">${client.name}</p>
+          <p class="text-[11px] text-slate-400 truncate">${client.sector}</p>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 ${colors.bg} ${colors.text}"><span class="w-1.5 h-1.5 rounded-full ${colors.dot}"></span>${level} &middot; ${score}%</span>
+      </div>
+      <div class="space-y-3">
+        ${client.riskFactors.map(f => `
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <p class="text-xs font-medium text-slate-600 dark:text-slate-300">${f.label}</p>
+              <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">${f.weight}%</p>
+            </div>
+            <div class="h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div class="h-full rounded-full ${level==='High'?'bg-rose-500':level==='Medium'?'bg-amber-500':'bg-emerald-500'}" style="width:${Math.min(100,f.weight*2.2)}%"></div>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1">${f.detail}</p>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ---------------------------------------------------------------------------
+// VENDORS & PAYABLES (Accounts Payable)
+// ---------------------------------------------------------------------------
+function getBillPriority(bill){
+  const diff = dayDiff(bill.dueDate);
+  const discountDiff = bill.discountDeadline ? dayDiff(bill.discountDeadline) : null;
+  if (diff > 0) return 'Urgent';
+  if (bill.discountPct > 0 && discountDiff !== null && discountDiff <= 0 && Math.abs(discountDiff) <= 5) return 'Discount';
+  if (diff >= -3) return 'DueSoon';
+  return 'Scheduled';
+}
+
+function billPriorityStyle(priority){
+  if (priority === 'Urgent') return { bg:'bg-rose-50 dark:bg-rose-500/10', text:'text-rose-700 dark:text-rose-400', dot:'bg-rose-500', label:'Urgent — Overdue' };
+  if (priority === 'Discount') return { bg:'bg-emerald-50 dark:bg-emerald-500/10', text:'text-emerald-700 dark:text-emerald-400', dot:'bg-emerald-500', label:'Discount Available' };
+  if (priority === 'DueSoon') return { bg:'bg-amber-50 dark:bg-amber-500/10', text:'text-amber-700 dark:text-amber-400', dot:'bg-amber-500', label:'Due Soon' };
+  return { bg:'bg-slate-100 dark:bg-slate-800', text:'text-slate-500 dark:text-slate-400', dot:'bg-slate-400', label:'Scheduled' };
+}
+
+function computeAPKPIs(){
+  const totalPayables = vendorBills.reduce((s,b) => s + b.amount, 0);
+  const dueThisWeek = vendorBills.filter(b => dayDiff(b.dueDate) >= -7);
+  const dueThisWeekAmount = dueThisWeek.reduce((s,b) => s + b.amount, 0);
+  const discountEligible = vendorBills.filter(b => getBillPriority(b) === 'Discount');
+  const discountValue = discountEligible.reduce((s,b) => s + b.amount * (b.discountPct/100), 0);
+  const overdueCount = vendorBills.filter(b => dayDiff(b.dueDate) > 0).length;
+  return { totalPayables, dueThisWeekCount: dueThisWeek.length, dueThisWeekAmount, discountValue, discountCount: discountEligible.length, overdueCount };
+}
+
+function renderNetCashBanner(){
+  const totalReceivables = invoices.reduce((s,i) => s + i.amount, 0);
+  const apKpi = computeAPKPIs();
+  const cashInBank = totalCashInBank();
+  const net = cashInBank + totalReceivables - apKpi.totalPayables;
+  const positive = net >= 0;
+  document.getElementById('netCashBanner').innerHTML = `
+    <div class="rounded-2xl border ${positive ? 'border-emerald-100 dark:border-emerald-500/20 bg-emerald-50/60 dark:bg-emerald-500/5' : 'border-amber-100 dark:border-amber-500/20 bg-amber-50/60 dark:bg-amber-500/5'} px-5 py-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center ${positive ? 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-amber-100 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400'}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Net Cash Position <span class="text-slate-400 dark:text-slate-500">(Bank + Receivables &minus; Payables)</span></p>
+          <p class="font-display font-extrabold text-xl ${positive ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'}">${positive ? '+' : '-'}PKR ${formatPKR(Math.abs(net))}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-5 text-xs flex-wrap">
+        <div>
+          <p class="text-slate-400">Cash in Bank</p>
+          <p class="font-semibold text-slate-700 dark:text-slate-200">PKR ${formatPKR(cashInBank)}</p>
+        </div>
+        <div class="w-px h-8 bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
+        <div>
+          <p class="text-slate-400">Receivables</p>
+          <p class="font-semibold text-slate-700 dark:text-slate-200">PKR ${formatPKR(totalReceivables)}</p>
+        </div>
+        <div class="w-px h-8 bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
+        <div>
+          <p class="text-slate-400">Payables</p>
+          <p class="font-semibold text-slate-700 dark:text-slate-200">PKR ${formatPKR(apKpi.totalPayables)}</p>
+        </div>
+        <button onclick="switchView('bankaccounts')" class="text-brand-600 dark:text-brand-400 font-semibold hover:underline">View accounts →</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderAPKPIs(containerId){
+  containerId = containerId || 'apKpiRow';
+  const kpi = computeAPKPIs();
+  const cards = [
+    { label:'Total Payables Outstanding', value:'PKR ' + formatPKRCompact(kpi.totalPayables), sub:`Across ${vendors.length} active vendors`,
+      icon:`<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>`, color:'slate' },
+    { label:'Due This Week', value: String(kpi.dueThisWeekCount) + ' bills', sub:`PKR ${formatPKR(kpi.dueThisWeekAmount)} due within 7 days`,
+      icon:`<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`, color:'amber' },
+    { label:'Early Payment Discounts', value:'PKR ' + formatPKR(kpi.discountValue), sub:`Available on ${kpi.discountCount} bill(s) if paid promptly`,
+      icon:`<path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`, color:'emerald' },
+    { label:'Overdue Payment Risk', value: String(kpi.overdueCount) + ' bills', sub: kpi.overdueCount > 0 ? 'Vendor relationship &amp; penalty risk' : 'No overdue bills',
+      icon:`<path d="M12 2L1 21h22L12 2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v5M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`, color:'rose' },
+  ];
+  const colorMap = {
+    slate:'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300',
+    amber:'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400',
+    emerald:'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+    rose:'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400',
+  };
+  document.getElementById(containerId).innerHTML = cards.map(c => `
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 p-5 hover:shadow-card transition-shadow duration-300">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${colorMap[c.color]}">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none">${c.icon}</svg>
+      </div>
+      <p class="font-display font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight">${c.value}</p>
+      <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">${c.label}</p>
+      <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">${c.sub}</p>
+    </div>
+  `).join('');
+}
+
+function renderVendorBillsTable(){
+  document.getElementById('vendorBillsTableBody').innerHTML = vendorBills.map(bill => {
+    const vendor = getVendor(bill.vendorId);
+    const priority = getBillPriority(bill);
+    const style = billPriorityStyle(priority);
+    const diff = dayDiff(bill.dueDate);
+    const dueTag = diff > 0
+      ? `<span class="text-rose-500 dark:text-rose-400 text-[11px]">${diff} day${diff>1?'s':''} overdue</span>`
+      : `<span class="text-slate-400 text-[11px]">due in ${Math.abs(diff)} day${Math.abs(diff)!==1?'s':''}</span>`;
+    const actionLabel = bill.scheduled ? 'Scheduled ✓' : (priority === 'Discount' ? `Pay Now & Save ${bill.discountPct}%` : 'Schedule Payment');
+    return `
+      <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors" onclick="openVendorDetail('${vendor.id}')">
+        <td class="px-6 py-4 font-mono text-xs text-slate-500 dark:text-slate-400">${bill.billNo}</td>
+        <td class="px-3 py-4">
+          <p class="text-sm font-semibold text-slate-800 dark:text-white">${vendor.name}</p>
+          <p class="text-[11px] text-slate-400">${vendor.city} &middot; ${vendor.category}</p>
+        </td>
+        <td class="px-3 py-4 font-mono text-sm font-semibold text-slate-800 dark:text-white">PKR ${formatPKR(bill.amount)}</td>
+        <td class="px-3 py-4">
+          <p class="text-sm text-slate-600 dark:text-slate-300">${formatDate(bill.dueDate)}</p>
+          ${dueTag}
+        </td>
+        <td class="px-3 py-4">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${style.bg} ${style.text}">
+            <span class="w-1.5 h-1.5 rounded-full ${style.dot}"></span>${style.label}
+          </span>
+        </td>
+        <td class="px-6 py-4 text-right">
+          <button ${bill.scheduled ? 'disabled' : ''} onclick="event.stopPropagation(); schedulePayment('${bill.id}')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${bill.scheduled ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-default' : 'bg-slate-900 dark:bg-brand-600 hover:bg-slate-800 dark:hover:bg-brand-700 text-white'}">${actionLabel}</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+const vendorAckReplies = [
+  'Received, we will process this on our end. Thank you.',
+  'Acknowledged — payment confirmation will be sent once cleared on our side.',
+  'Thank you for confirming, we\'ll update our records accordingly.',
+];
+
+function generateVendorAckReply(billId){
+  const variants = vendorAckReplies;
+  return variants[billId.length % variants.length];
+}
+
+function schedulePayment(billId){
+  const bill = vendorBills.find(b => b.id === billId);
+  if (!bill || bill.scheduled) return;
+  openPaymentAcctModal(billId);
+}
+
+function openPaymentAcctModal(billId){
+  const bill = vendorBills.find(b => b.id === billId);
+  const vendor = getVendor(bill.vendorId);
+  const suggestion = suggestBankAccount(bill.amount);
+
+  const accountCard = (acc, isSuggested) => {
+    const sufficient = acc.balance >= bill.amount;
+    return `
+      <button onclick="confirmScheduledPayment('${billId}','${acc.id}')" ${sufficient ? '' : 'disabled'}
+        class="w-full text-left p-3.5 rounded-xl border transition-colors ${isSuggested ? 'border-brand-400 bg-brand-50 dark:bg-brand-500/10 dark:border-brand-500/40' : 'border-slate-100 dark:border-slate-800'} ${sufficient ? 'hover:border-brand-300 cursor-pointer' : 'opacity-50 cursor-not-allowed'}">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">${acc.bank} <span class="text-[10px] font-normal text-slate-400">${acc.type}</span>${isSuggested ? '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-brand-600 text-white">AiNow Pick</span>' : ''}</p>
+            <p class="text-[11px] font-mono text-slate-400">${maskAccountNo(acc.accountNo)}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm font-mono font-semibold text-slate-700 dark:text-slate-200">PKR ${formatPKR(acc.balance)}</p>
+            <p class="text-[10px] ${sufficient ? 'text-emerald-500' : 'text-rose-500'}">${sufficient ? 'Sufficient balance' : 'Insufficient'}</p>
+          </div>
+        </div>
+      </button>
+    `;
+  };
+
+  document.getElementById('paymentAcctContent').innerHTML = `
+    <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between">
+      <div>
+        <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white">Choose Payment Account</h3>
+        <p class="text-xs text-slate-400 mt-1">${vendor.name} &middot; PKR ${formatPKR(bill.amount)}</p>
+      </div>
+      <button onclick="closePaymentAcctModal()" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="p-6 space-y-4">
+      ${suggestion.ok ? `
+        <div class="flex items-start gap-2.5 bg-brand-50 dark:bg-brand-500/10 rounded-xl p-3.5">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="text-brand-600 dark:text-brand-400 shrink-0 mt-0.5"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="currentColor"/></svg>
+          <p class="text-xs text-brand-800 dark:text-brand-300">AiNow suggests <span class="font-semibold">${suggestion.account.bank}</span> — it's the smallest account that fully covers this payment, leaving PKR ${formatPKR(suggestion.remaining)} remaining and keeping your bigger accounts free.</p>
+        </div>
+      ` : `
+        <div class="flex items-start gap-2.5 bg-rose-50 dark:bg-rose-500/10 rounded-xl p-3.5">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="text-rose-600 dark:text-rose-400 shrink-0 mt-0.5"><path d="M12 2L1 21h22L12 2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v5M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <p class="text-xs text-rose-800 dark:text-rose-300">No single account fully covers PKR ${formatPKR(bill.amount)} — even your largest account (${suggestion.account.bank}) is short by PKR ${formatPKR(suggestion.shortfall)}. Consider a partial payment or topping up before scheduling.</p>
+        </div>
+      `}
+      <div class="space-y-2.5">
+        ${[...bankAccounts].sort((a,b) => b.balance - a.balance).map(acc => accountCard(acc, suggestion.ok && acc.id === suggestion.account.id)).join('')}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('paymentAcctBackdrop').classList.remove('opacity-0','pointer-events-none');
+  document.getElementById('paymentAcctModalWrap').classList.remove('pointer-events-none');
+  document.getElementById('paymentAcctModal').classList.remove('modal-closed');
+}
+
+function closePaymentAcctModal(){
+  document.getElementById('paymentAcctBackdrop').classList.add('opacity-0','pointer-events-none');
+  document.getElementById('paymentAcctModalWrap').classList.add('pointer-events-none');
+  document.getElementById('paymentAcctModal').classList.add('modal-closed');
+}
+
+function confirmScheduledPayment(billId, accountId){
+  const bill = vendorBills.find(b => b.id === billId);
+  const vendor = getVendor(bill.vendorId);
+  const account = getBankAccount(accountId);
+  if (!bill || bill.scheduled || !account || account.balance < bill.amount) return;
+
+  const priority = getBillPriority(bill);
+  bill.scheduled = true;
+  account.balance -= bill.amount;
+
+  const scheduledDate = priority === 'Discount' ? bill.discountDeadline : bill.dueDate;
+  const savingsNote = priority === 'Discount' ? ` — saving PKR ${formatPKR(bill.amount * (bill.discountPct/100))}` : '';
+
+  closePaymentAcctModal();
+  showToast('✅ Payment scheduled via AiNow Payments Gateway!', `PKR ${formatPKR(bill.amount)} to ${vendor.name} from ${account.bank} on ${formatDate(scheduledDate)}${savingsNote}`);
+  logActivity('payment_scheduled', `Payment scheduled to ${vendor.name}`, `PKR ${formatPKR(bill.amount)} scheduled for ${formatDate(scheduledDate)}${savingsNote}, paid from ${account.bank} (${maskAccountNo(account.accountNo)})`, { vendorId: vendor.id });
+
+  renderVendorBillsTable();
+  renderAPKPIs();
+  renderAPKPIs('apKpiRowDashboard');
+  renderNetCashBanner();
+  if (document.getElementById('view-bankaccounts') && !document.getElementById('view-bankaccounts').classList.contains('hidden')){
+    renderBankAccountsView();
+  }
+
+  // Simulate the vendor acknowledging — so vendor chat history builds up just like client reminders do
+  setTimeout(() => {
+    const reply = generateVendorAckReply(bill.id);
+    logActivity('payment_response', `${vendor.name} replied`, `"${reply}"`, { vendorId: vendor.id });
+    showToast(`💬 ${vendor.name} responded`, reply);
+    if (document.getElementById('detailContent').dataset.vendorId === vendor.id){
+      openVendorDetail(vendor.id);
+    }
+  }, 5000);
+}
+
+// ---------------------------------------------------------------------------
+// BANK ACCOUNTS VIEW
+// ---------------------------------------------------------------------------
+function renderBankAccountsView(){
+  const total = totalCashInBank();
+  document.getElementById('bankTotalCash').innerHTML = `
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 p-5 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="2" y="7" width="20" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M2 10h20" stroke="currentColor" stroke-width="2"/></svg>
+      </div>
+      <div>
+        <p class="font-display font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight">PKR ${formatPKR(total)}</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Total cash across ${bankAccounts.length} business accounts</p>
+      </div>
+    </div>
+  `;
+
+  const maxBalance = Math.max(...bankAccounts.map(a => a.balance));
+  document.getElementById('bankAccountsGrid').innerHTML = bankAccounts.map(acc => `
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 p-5">
+      <p class="text-sm font-semibold text-slate-800 dark:text-white">${acc.bank}</p>
+      <p class="text-[11px] text-slate-400 mb-3">${acc.type} &middot; ${maskAccountNo(acc.accountNo)}</p>
+      <p class="font-display font-extrabold text-xl text-slate-900 dark:text-white">PKR ${formatPKR(acc.balance)}</p>
+      <div class="h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden mt-3">
+        <div class="h-full rounded-full bg-brand-500" style="width:${Math.max(4, (acc.balance/maxBalance)*100)}%"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ---------------------------------------------------------------------------
+// VENDOR DETAIL DRAWER
+// ---------------------------------------------------------------------------
+function openVendorDetail(vendorId){
+  const vendor = getVendor(vendorId);
+  const bills = vendorBills.filter(b => b.vendorId === vendorId);
+  const totalOwed = bills.reduce((s,b) => s + b.amount, 0);
+
+  document.getElementById('detailContent').dataset.vendorId = vendorId;
+  document.getElementById('detailContent').dataset.clientId = '';
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 dark:from-brand-400 dark:to-brand-600 flex items-center justify-center text-white font-bold">${initials(vendor.name)}</div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white leading-tight">${vendor.name}</h3>
+          <p class="text-xs text-slate-400">${vendor.city} &middot; ${vendor.category}</p>
+        </div>
+      </div>
+      <button onclick="closeDetail()" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="p-6 space-y-6">
+      <div class="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3.5">
+        <p class="text-[11px] text-slate-400 mb-1">Total Owed</p>
+        <p class="font-display font-bold text-slate-800 dark:text-white">PKR ${formatPKR(totalOwed)}</p>
+      </div>
+
+      <div>
+        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Contact</p>
+        <div class="space-y-1.5 text-sm text-slate-600 dark:text-slate-300">
+          <p class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-slate-400"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>${vendor.contact}</p>
+          <p class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-slate-400"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z" stroke="currentColor" stroke-width="2"/></svg>${vendor.phone}</p>
+          <p class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="text-slate-400"><path d="M4 4h16v16H4z" stroke="currentColor" stroke-width="2"/><path d="M22 6l-10 7L2 6" stroke="currentColor" stroke-width="2"/></svg>${vendor.email}</p>
+        </div>
+      </div>
+
+      <div>
+        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Bills Payable</p>
+        <div class="space-y-2">
+          ${bills.map(bill => {
+            const diff = dayDiff(bill.dueDate);
+            const priority = getBillPriority(bill);
+            const style = billPriorityStyle(priority);
+            return `
+            <div class="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+              <div>
+                <p class="text-sm font-mono font-semibold text-slate-700 dark:text-slate-200">${bill.billNo}</p>
+                <p class="text-[11px] text-slate-400">${diff>0? diff+' days overdue' : 'due in '+Math.abs(diff)+' days'}</p>
+                <span class="inline-flex items-center gap-1.5 mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${style.bg} ${style.text}"><span class="w-1.5 h-1.5 rounded-full ${style.dot}"></span>${style.label}</span>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-semibold text-slate-800 dark:text-white">PKR ${formatPKR(bill.amount)}</p>
+                ${bill.scheduled
+                  ? `<span class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">Scheduled ✓</span>`
+                  : `<button onclick="schedulePayment('${bill.id}')" class="text-[11px] font-semibold text-brand-600 dark:text-brand-400 hover:underline">Schedule payment →</button>`}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Payment Communication History</p>
+          <span class="text-[10px] text-slate-400">${activityLog.filter(a=>a.vendorId===vendor.id).length} logged event(s)</span>
+        </div>
+        <div class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+          ${renderEntityHistoryThread('vendor', vendor.id)}
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('detailBackdrop').classList.remove('opacity-0','pointer-events-none');
+  document.getElementById('detailDrawer').classList.remove('drawer-closed');
+}
+
+// ---------------------------------------------------------------------------
+// ACTIVITY LOG
+// ---------------------------------------------------------------------------
+function logActivity(type, title, detail, extra){
+  activityLog.unshift(Object.assign({ id:'a' + Date.now() + Math.random().toString(36).slice(2,6), type, title, detail, time: Date.now() }, extra || {}));
+  if (document.getElementById('view-activitylog') && !document.getElementById('view-activitylog').classList.contains('hidden')){
+    renderActivityLog();
+  }
+}
+
+function activityStyle(type){
+  if (type === 'reminder_sent') return { bg:'bg-brand-50 dark:bg-brand-500/10', text:'text-brand-600 dark:text-brand-400', icon:`<path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>` };
+  if (type === 'reminder_response') return { bg:'bg-emerald-50 dark:bg-emerald-500/10', text:'text-emerald-600 dark:text-emerald-400', icon:`<path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>` };
+  if (type === 'payment_scheduled') return { bg:'bg-slate-100 dark:bg-slate-800', text:'text-slate-600 dark:text-slate-300', icon:`<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>` };
+  return { bg:'bg-slate-100 dark:bg-slate-800', text:'text-slate-500 dark:text-slate-400', icon:`<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>` };
+}
+
+function timeAgo(ts){
+  const mins = Math.round((Date.now() - ts) / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  return Math.round(hrs / 24) + 'd ago';
+}
+
+let activityFilter = 'all';
+
+function renderActivityFilterOptions(){
+  const select = document.getElementById('activityFilterSelect');
+  if (!select) return;
+  const clientIds = [...new Set(activityLog.filter(a => a.clientId).map(a => a.clientId))];
+  const vendorIds = [...new Set(activityLog.filter(a => a.vendorId).map(a => a.vendorId))];
+  let html = `<option value="all">All Activity</option>`;
+  if (clientIds.length){
+    html += `<optgroup label="Clients">${clientIds.map(id => `<option value="client:${id}">${getClient(id).name}</option>`).join('')}</optgroup>`;
+  }
+  if (vendorIds.length){
+    html += `<optgroup label="Vendors">${vendorIds.map(id => `<option value="vendor:${id}">${getVendor(id).name}</option>`).join('')}</optgroup>`;
+  }
+  select.innerHTML = html;
+  select.value = activityFilter;
+}
+
+function renderActivityLog(){
+  renderActivityFilterOptions();
+  let filtered = [...activityLog];
+  if (activityFilter !== 'all'){
+    const [kind, id] = activityFilter.split(':');
+    filtered = filtered.filter(a => kind === 'client' ? a.clientId === id : a.vendorId === id);
+  }
+  const sorted = filtered.sort((a,b) => b.time - a.time);
+  document.getElementById('activityLogList').innerHTML = sorted.map(a => {
+    const s = activityStyle(a.type);
+    return `
+    <div class="p-4 lg:px-6 flex items-start gap-3">
+      <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${s.bg} ${s.text}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">${s.icon}</svg>
+      </span>
+      <div class="min-w-0 flex-1">
+        <p class="text-sm font-semibold text-slate-800 dark:text-white">${a.title}</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${a.detail}</p>
+        <p class="text-[11px] text-slate-400 mt-1">${timeAgo(a.time)}</p>
+      </div>
+    </div>`;
+  }).join('') || `<div class="text-center py-12 text-sm text-slate-400">No activity yet for this filter.</div>`;
+}
+
+
+let reminderState = { invoiceId:null, tone:'Polite', lang:'English', channel:'WhatsApp' };
+const reminderUIOpts = {};
+
+// ---------------------------------------------------------------------------
+// AI REMINDER GENERATOR (reusable playground — powers both the modal and the
+// dedicated AI Reminders view)
+// ---------------------------------------------------------------------------
+function openReminder(invoiceId){
+  closeDetail();
+  reminderState = { invoiceId, tone:'Polite', lang:'English', channel:'WhatsApp' };
+  renderReminderUI('reminderContent', invoiceId, { closable:true, showHeader:true });
+  document.getElementById('reminderBackdrop').classList.remove('opacity-0','pointer-events-none');
+  document.getElementById('reminderModalWrap').classList.remove('pointer-events-none');
+  document.getElementById('reminderModal').classList.remove('modal-closed');
+}
+
+function closeReminder(){
+  document.getElementById('reminderBackdrop').classList.add('opacity-0','pointer-events-none');
+  document.getElementById('reminderModalWrap').classList.add('pointer-events-none');
+  document.getElementById('reminderModal').classList.add('modal-closed');
+}
+
+// ---------------------------------------------------------------------------
+// AI REMINDERS VIEW (embedded playground, invoice list on the left)
+// ---------------------------------------------------------------------------
+let remindersSelectedInvoice = null;
+
+function renderRemindersView(){
+  if (!remindersSelectedInvoice){
+    const pending = invoices.find(i => !i.reminderSent) || invoices[0];
+    remindersSelectedInvoice = pending.id;
+  }
+  reminderState.invoiceId = remindersSelectedInvoice;
+
+  document.getElementById('remindersList').innerHTML = `
+    <div class="p-4 border-b border-slate-100 dark:border-slate-800">
+      <h3 class="font-display font-bold text-sm text-slate-800 dark:text-white">Outstanding Invoices</h3>
+      <p class="text-[11px] text-slate-400 mt-0.5">Select an invoice to draft an AI reminder</p>
+    </div>
+    <div class="divide-y divide-slate-100 dark:divide-slate-800 max-h-[560px] overflow-y-auto">
+      ${invoices.map(inv => {
+        const client = getClient(inv.clientId);
+        const level = riskLevel(riskScore(client));
+        const colors = riskColors(level);
+        const active = inv.id === remindersSelectedInvoice;
+        return `
+        <button onclick="selectReminderInvoice('${inv.id}')" class="w-full text-left px-4 py-3 flex items-center justify-between gap-3 transition-colors ${active ? 'bg-brand-50 dark:bg-brand-500/10' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'}">
+          <div class="min-w-0">
+            <p class="text-xs font-semibold text-slate-800 dark:text-white truncate">${client.name}</p>
+            <p class="text-[11px] text-slate-400 font-mono">${inv.invoiceNo} &middot; PKR ${formatPKR(inv.amount)}</p>
+          </div>
+          <div class="flex flex-col items-end gap-1 shrink-0">
+            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${colors.bg} ${colors.text}"><span class="w-1 h-1 rounded-full ${colors.dot}"></span>${level}</span>
+            ${inv.reminderSent ? '<span class="text-[10px] text-emerald-500 dark:text-emerald-400 font-medium">&#10003; Reminded</span>' : ''}
+          </div>
+        </button>`;
+      }).join('')}
+    </div>
+  `;
+
+  renderReminderUI('remindersPlaygroundWrap', remindersSelectedInvoice, { closable:false, showHeader:true });
+}
+
+function selectReminderInvoice(invoiceId){
+  remindersSelectedInvoice = invoiceId;
+  reminderState = { invoiceId, tone:'Polite', lang:'English', channel:'WhatsApp' };
+  renderRemindersView();
+}
+
+// ---------------------------------------------------------------------------
+// SHARED PLAYGROUND RENDERER
+// ---------------------------------------------------------------------------
+function renderReminderUI(containerId, invoiceId, opts){
+  if (opts) reminderUIOpts[containerId] = opts;
+  const finalOpts = reminderUIOpts[containerId] || { closable:true, showHeader:true };
+
+  reminderState.invoiceId = invoiceId;
+  const invoice = invoices.find(i => i.id === invoiceId);
+  const client = getClient(invoice.clientId);
+  const level = riskLevel(riskScore(client));
+  const colors = riskColors(level);
+
+  const toneOpts = ['Polite','Firm','Professional'];
+  const langOpts = [{k:'English',l:'English'},{k:'RomanUrdu',l:'Roman Urdu'},{k:'UrduScript',l:'اردو'}];
+
+  const header = finalOpts.showHeader ? `
+    <div class="${finalOpts.closable ? 'pb-4 mb-5 border-b border-slate-100 dark:border-slate-800' : 'pb-4 mb-1'} flex items-start justify-between">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white">AI Reminder Generator</h3>
+          <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full glow-text bg-brand-50 dark:bg-brand-500/10">AiNow</span>
+        </div>
+        <p class="text-xs text-slate-400">${client.name} &middot; ${invoice.invoiceNo} &middot; PKR ${formatPKR(invoice.amount)}
+          <span class="inline-flex items-center gap-1 ml-1.5 px-1.5 py-0.5 rounded-full ${colors.bg} ${colors.text} font-semibold">${level} risk</span>
+        </p>
+      </div>
+      ${finalOpts.closable ? `<button onclick="closeReminder()" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>` : ''}
+    </div>` : '';
+
+  const bodyPadding = finalOpts.closable ? 'p-5 lg:p-6' : '';
+
+  document.getElementById(containerId).innerHTML = `
+    ${finalOpts.closable ? `<div class="p-5 lg:p-6 pb-0">${header}</div>` : header}
+    <div class="${bodyPadding} ${finalOpts.closable ? 'pt-0' : ''} grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <!-- CONTROLS -->
+      <div class="lg:col-span-2 space-y-5">
+        <div>
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Tone</p>
+          <div class="segmented grid grid-cols-3 gap-1.5">
+            ${toneOpts.map(t => `<button data-tone="${t}" class="tone-btn px-2 py-2 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-700 transition-colors ${reminderState.tone===t?'active':'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400'}">${t}</button>`).join('')}
+          </div>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Language</p>
+          <div class="segmented grid grid-cols-3 gap-1.5">
+            ${langOpts.map(o => `<button data-lang="${o.k}" class="lang-btn px-2 py-2 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-700 transition-colors ${reminderState.lang===o.k?'active':'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400'}">${o.l}</button>`).join('')}
+          </div>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Send via</p>
+          <div class="flex gap-1.5">
+            <button data-channel="WhatsApp" class="channel-btn flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${reminderState.channel==='WhatsApp'?'bg-emerald-500 text-white border-emerald-500':'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5.1-1.3A10 10 0 1012 2zm0 18.2a8.2 8.2 0 01-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1112 20.2z"/></svg>
+              WhatsApp
+            </button>
+            <button data-channel="Email" class="channel-btn flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${reminderState.channel==='Email'?'bg-slate-900 dark:bg-brand-500 text-white dark:text-slate-900 border-slate-900 dark:border-brand-500':'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v16H4z" stroke="currentColor" stroke-width="2"/><path d="M22 6l-10 7L2 6" stroke="currentColor" stroke-width="2"/></svg>
+              Email
+            </button>
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <button id="sendReminderBtn-${containerId}" class="send-reminder-btn w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold bg-brand-600 hover:bg-brand-700 text-white transition-colors shadow-lg shadow-brand-600/20">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Send Reminder via ${reminderState.channel}
+          </button>
+          <p class="text-[10px] text-slate-400 text-center mt-2">Simulated send — routed through the AiNow messaging gateway</p>
+        </div>
+      </div>
+
+      <!-- LIVE PREVIEW -->
+      <div class="lg:col-span-3">
+        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Live Preview</p>
+        <div id="previewArea-${containerId}"></div>
+      </div>
+    </div>
+  `;
+
+  bindReminderControls(containerId);
+  renderPreview(containerId);
+}
+
+function bindReminderControls(containerId){
+  const root = document.getElementById(containerId);
+  root.querySelectorAll('.tone-btn').forEach(btn => btn.addEventListener('click', () => {
+    reminderState.tone = btn.dataset.tone; renderReminderUI(containerId, reminderState.invoiceId);
+  }));
+  root.querySelectorAll('.lang-btn').forEach(btn => btn.addEventListener('click', () => {
+    reminderState.lang = btn.dataset.lang; renderReminderUI(containerId, reminderState.invoiceId);
+  }));
+  root.querySelectorAll('.channel-btn').forEach(btn => btn.addEventListener('click', () => {
+    reminderState.channel = btn.dataset.channel; renderReminderUI(containerId, reminderState.invoiceId);
+  }));
+  const sendBtn = root.querySelector('.send-reminder-btn');
+  if (sendBtn) sendBtn.addEventListener('click', () => sendReminder(containerId));
+}
+
+function renderPreview(containerId){
+  const invoice = invoices.find(i => i.id === reminderState.invoiceId);
+  const client = getClient(invoice.clientId);
+  const area = document.getElementById('previewArea-' + containerId);
+  if (!area) return;
+
+  // brief shimmer to sell the "AI generating" feel
+  area.innerHTML = `<div class="rounded-2xl border border-slate-100 dark:border-slate-800 p-5 space-y-2">
+    <div class="h-3 w-3/4 rounded shimmer"></div>
+    <div class="h-3 w-full rounded shimmer"></div>
+    <div class="h-3 w-5/6 rounded shimmer"></div>
+    <div class="h-3 w-2/3 rounded shimmer"></div>
+  </div>`;
+
+  setTimeout(() => {
+    const message = buildReminderMessage(client, invoice, reminderState.tone, reminderState.lang);
+    const isUrdu = reminderState.lang === 'UrduScript';
+    const textClass = isUrdu ? 'font-urdu text-right' : '';
+    const dir = isUrdu ? 'rtl' : 'ltr';
+
+    if (reminderState.channel === 'WhatsApp'){
+      area.innerHTML = `
+        <div class="rounded-[28px] border-[6px] border-slate-800 dark:border-slate-700 bg-slate-800 dark:bg-slate-700 shadow-xl max-w-[300px] mx-auto overflow-hidden">
+          <div class="bg-[#075E54] text-white px-4 py-3 flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">${initials(client.name)}</div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-semibold truncate">${client.name}</p>
+              <p class="text-[10px] text-white/70">online</p>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="text-white/80"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>
+          </div>
+          <div class="bg-[#e5ddd5] px-3 py-4 min-h-[260px] flex flex-col justify-end">
+            <div class="relative bg-[#d9fdd3] whatsapp-tail rounded-lg rounded-tr-none px-3 py-2 max-w-[92%] self-end shadow-sm">
+              <p class="text-[12.5px] text-slate-800 whitespace-pre-line ${textClass}" dir="${dir}">${message}</p>
+              <p class="text-[9px] text-slate-500 text-right mt-1">${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})} <span class="text-sky-500">✓✓</span></p>
+            </div>
+          </div>
+          <div class="bg-[#f0f0f0] px-3 py-2 flex items-center gap-2">
+            <div class="flex-1 bg-white rounded-full px-3 py-1.5 text-[11px] text-slate-400">Message</div>
+            <div class="w-7 h-7 rounded-full bg-[#075E54] flex items-center justify-center"><svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></div>
+          </div>
+        </div>
+      `;
+    } else {
+      area.innerHTML = `
+        <div class="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-white shadow-sm">
+          <div class="bg-slate-50 border-b border-slate-200 px-4 py-3 space-y-1">
+            <p class="text-[11px] text-slate-500"><span class="font-semibold text-slate-600">From:</span> billing@alkaramtextiles.pk</p>
+            <p class="text-[11px] text-slate-500"><span class="font-semibold text-slate-600">To:</span> ${client.email}</p>
+            <p class="text-[11px] text-slate-500"><span class="font-semibold text-slate-600">Subject:</span> Payment Reminder — Invoice ${invoice.invoiceNo}</p>
+          </div>
+          <div class="px-5 py-5 min-h-[220px]">
+            <p class="text-[13px] text-slate-700 whitespace-pre-line leading-relaxed ${textClass}" dir="${dir}">${message}</p>
+            <div class="mt-6 pt-4 border-t border-slate-100">
+              <p class="text-[11px] text-slate-400">Sent automatically via PaisaFlow AI &middot; Al-Karam Textiles</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }, 380);
+}
+
+const mockReplyTemplates = {
+  Polite: ["Thank you for the reminder, I'll process the payment by {date}.", "Noted with thanks — payment will be sent shortly."],
+  Firm: ["Apologies for the delay, payment will be made within 2 business days.", "Understood, clearing this immediately."],
+  Professional: ["Acknowledged. Payment confirmation will follow within 48 hours.", "Received — we will settle this invoice by end of week."],
+};
+
+function generateMockReply(tone, invoiceId){
+  const variants = mockReplyTemplates[tone] || mockReplyTemplates.Polite;
+  const pick = variants[invoiceId.length % variants.length];
+  const futureDate = new Date(TODAY.getTime() + 3*86400000);
+  return pick.replace('{date}', futureDate.toLocaleDateString('en-GB', { day:'2-digit', month:'short' }));
+}
+
+function languageLabel(lang){
+  return lang === 'English' ? 'English' : (lang === 'RomanUrdu' ? 'Roman Urdu' : 'Urdu script');
+}
+
+function performReminderSend(invoiceId, tone, channel, language){
+  const invoice = invoices.find(i => i.id === invoiceId);
+  const client = getClient(invoice.clientId);
+  invoice.reminderSent = true;
+  invoice.reminderSentAt = Date.now();
+  const langLabel = languageLabel(language);
+
+  showToast(`✅ ${channel} sent via AiNow Gateway!`, `Reminder delivered to ${client.name}`);
+  logActivity('reminder_sent', `Reminder sent to ${client.name}`, `${tone} tone, ${langLabel}, via ${channel}`, { clientId: client.id });
+  renderTable();
+
+  // Simulate the client actually replying a little later — so the loop is genuinely logged, not just "sent"
+  setTimeout(() => {
+    const reply = generateMockReply(tone, invoice.id);
+    logActivity('reminder_response', `${client.name} replied`, `"${reply}"`, { clientId: client.id });
+    showToast(`💬 ${client.name} responded`, reply);
+    if (document.getElementById('detailContent').dataset.clientId === client.id){
+      openDetail(client.id);
+    }
+  }, 5000);
+
+  const remindersViewEl = document.getElementById('view-reminders');
+  if (remindersViewEl && !remindersViewEl.classList.contains('hidden')){
+    renderRemindersView();
+  }
+}
+
+function sendReminder(containerId){
+  const btn = document.getElementById('sendReminderBtn-' + containerId);
+  const invoiceId = reminderState.invoiceId;
+  const tone = reminderState.tone;
+  const channel = reminderState.channel;
+  const language = reminderState.lang;
+  const originalHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<svg class="animate-spin" width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" stroke-dasharray="40" stroke-dashoffset="15" opacity="0.6"/></svg> Sending via AiNow Gateway...`;
+
+  setTimeout(() => {
+    performReminderSend(invoiceId, tone, channel, language);
+
+    const remindersViewOpen = !document.getElementById('view-reminders').classList.contains('hidden');
+    if (!remindersViewOpen){
+      setTimeout(() => { closeReminder(); btn.disabled = false; btn.innerHTML = originalHTML; }, 900);
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = originalHTML;
+    }
+  }, 1100);
+}
+
+// ---------------------------------------------------------------------------
+// TOASTS
+// ---------------------------------------------------------------------------
+function showToast(title, subtitle){
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast-anim bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl p-4 flex items-start gap-3';
+  toast.innerHTML = `
+    <div class="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center shrink-0">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="flex-1 min-w-0">
+      <p class="text-sm font-semibold text-slate-800 dark:text-white">${title}</p>
+      <p class="text-xs text-slate-400 mt-0.5">${subtitle}</p>
+    </div>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.transition = 'opacity .3s ease, transform .3s ease';
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(20px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 4200);
+}
+
+// ---------------------------------------------------------------------------
+// THEME TOGGLE
+// ---------------------------------------------------------------------------
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const html = document.documentElement;
+  html.classList.toggle('dark');
+  document.getElementById('iconMoon').classList.toggle('hidden');
+  document.getElementById('iconSun').classList.toggle('hidden');
+});
+
+// ---------------------------------------------------------------------------
+// SEARCH
+// ---------------------------------------------------------------------------
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  searchTerm = e.target.value;
+  renderTable();
+});
+
+document.getElementById('activityFilterSelect').addEventListener('change', (e) => {
+  activityFilter = e.target.value;
+  renderActivityLog();
+});
+
+// ---------------------------------------------------------------------------
+// SIDEBAR NAV — real view switching
+// ---------------------------------------------------------------------------
+function switchView(view){
+  document.querySelectorAll('.view-panel').forEach(p => p.classList.add('hidden'));
+  document.getElementById('view-' + view).classList.remove('hidden');
+
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    const active = b.dataset.view === view;
+    b.classList.toggle('bg-brand-50', active);
+    b.classList.toggle('dark:bg-brand-500/10', active);
+    b.classList.toggle('text-brand-700', active);
+    b.classList.toggle('dark:text-brand-400', active);
+    b.classList.toggle('text-slate-500', !active);
+    b.classList.toggle('dark:text-slate-400', !active);
+  });
+
+  if (view === 'clients') { renderRiskFilters(); renderTable(); }
+  if (view === 'reminders') renderRemindersView();
+  if (view === 'analytics') renderAnalyticsView();
+  if (view === 'vendors') { renderAPKPIs('apKpiRow'); renderVendorBillsTable(); }
+  if (view === 'activitylog') renderActivityLog();
+  if (view === 'bankaccounts') renderBankAccountsView();
+
+  const mainEl = document.querySelector('main');
+  if (mainEl && typeof mainEl.scrollTo === 'function'){
+    mainEl.scrollTo({ top: 0, behavior:'smooth' });
+  }
+}
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchView(btn.dataset.view));
+});
+
+// ---------------------------------------------------------------------------
+// NOTIFICATIONS DROPDOWN
+// ---------------------------------------------------------------------------
+const mockNotifications = [
+  { title:'High risk flagged', body:'Al-Noor Construction Supplies crossed the 90% risk threshold.', time:'12m ago', dot:'bg-rose-500' },
+  { title:'Reminder delivered', body:'WhatsApp reminder sent to Faisalabad Textile Mills.', time:'1h ago', dot:'bg-emerald-500' },
+  { title:'Invoice overdue', body:'Sindh Steel Corp — INV-2026-0367 is now 30 days overdue.', time:'3h ago', dot:'bg-amber-500' },
+];
+
+document.getElementById('notifList').innerHTML = mockNotifications.map(n => `
+  <div class="px-4 py-3 flex items-start gap-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+    <span class="w-1.5 h-1.5 rounded-full ${n.dot} mt-1.5 shrink-0"></span>
+    <div class="min-w-0">
+      <p class="text-xs font-semibold text-slate-800 dark:text-white">${n.title}</p>
+      <p class="text-[11px] text-slate-400 mt-0.5">${n.body}</p>
+      <p class="text-[10px] text-slate-300 dark:text-slate-600 mt-1">${n.time}</p>
+    </div>
+  </div>
+`).join('');
+
+document.getElementById('notifBell').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('notifDropdown').classList.toggle('hidden');
+  document.getElementById('notifDot').classList.add('hidden');
+});
+document.addEventListener('click', (e) => {
+  const dropdown = document.getElementById('notifDropdown');
+  const bell = document.getElementById('notifBell');
+  if (!dropdown.classList.contains('hidden') && !dropdown.contains(e.target) && !bell.contains(e.target)){
+    dropdown.classList.add('hidden');
+  }
+});
+
+// ---------------------------------------------------------------------------
+// AI ASSISTANT — QUERY ENGINE (chat + voice, with real task execution)
+// ---------------------------------------------------------------------------
+let pendingIntent = null;
+
+function extractReminderSlots(text){
+  const q = text.toLowerCase();
+  let tone = null, channel = null, language = null;
+
+  if (q.includes('polite')) tone = 'Polite';
+  else if (q.includes('firm')) tone = 'Firm';
+  else if (q.includes('professional')) tone = 'Professional';
+
+  if (q.includes('whatsapp')) channel = 'WhatsApp';
+  else if (q.includes('email') || q.includes('e-mail')) channel = 'Email';
+
+  if (q.includes('roman urdu')) language = 'RomanUrdu';
+  else if (q.includes('urdu script') || q.includes('اردو رسم الخط')) language = 'UrduScript';
+  else if (q.includes('urdu') || q.includes('اردو')) language = 'RomanUrdu';
+  else if (q.includes('english')) language = 'English';
+
+  return { tone, channel, language };
+}
+
+const GENERIC_NAME_WORDS = new Set(['traders','distributors','corp','corporation','co','company','ltd','pvt','logistics','textile','textiles','mills','exporters','solutions','foods','construction','supplies','auto','parts','organics','pharma','pharmaceutical','steel','hardware','rice','tea','oil','dyes','chemicals','packaging','yarn','utilities','power','ginners','distribution']);
+
+function tokensOf(name){
+  return name.toLowerCase().split(/\s+/).map(w => w.replace(/[^a-z0-9]/g,'')).filter(w => w.length > 2 && !GENERIC_NAME_WORDS.has(w));
+}
+
+function findEntityInQuery(query, list){
+  const q = query.toLowerCase();
+  let match = null;
+  list.forEach(item => {
+    if (match) return;
+    const nameLower = item.name.toLowerCase();
+    if (q.includes(nameLower)){ match = item; return; }
+    const toks = tokensOf(item.name);
+    if (toks.some(t => q.includes(t))) match = item;
+  });
+  return match;
+}
+
+function processAssistantQuery(rawQuery){
+  const q = rawQuery.toLowerCase().trim();
+
+  if (pendingIntent && pendingIntent.type === 'remind'){
+    const slots = extractReminderSlots(rawQuery);
+    const tone = pendingIntent.tone || slots.tone || 'Polite';
+    const channel = pendingIntent.channel || slots.channel || 'WhatsApp';
+    const language = pendingIntent.language || slots.language || 'English';
+    const clientId = pendingIntent.clientId;
+    const invoiceId = pendingIntent.invoiceId;
+    const client = getClient(clientId);
+    pendingIntent = null;
+
+    return {
+      reply: `Got it — sending a ${tone} reminder to ${client.name} via ${channel} in ${languageLabel(language)}.`,
+      replyUrdu: `ٹھیک ہے — ${client.name} کو ${channel} کے ذریعے یاد دہانی بھیج رہا ہوں۔`,
+      action: () => performReminderSend(invoiceId, tone, channel, language)
+    };
+  }
+
+  if (/^(hi|hello|hey|salam|assalam|السلام)/.test(q)){
+    return {
+      reply: "Hello! I'm your AiNow assistant. Ask me about outstanding invoices, risky clients, vendor payments, or say something like \"remind Al-Rehman Traders\" or \"show me vendors\".",
+      replyUrdu: "السلام علیکم! میں آپ کا AiNow اسسٹنٹ ہوں۔ مجھ سے واجب الادا رقم، خطرناک کلائنٹس، یا وینڈر ادائیگیوں کے بارے میں پوچھیں، یا کہیں \"Al-Rehman Traders کو یاد دہانی بھیجو\"۔"
+    };
+  }
+  if (q.includes('help') || q.includes('what can you') || q.includes('madad') || q.includes('kya kar')){
+    return {
+      reply: "I can tell you: total outstanding receivables, total payables to vendors, which clients are high risk, which vendor bills are overdue or have early-payment discounts, and I can trigger actions like sending a reminder, scheduling a payment, or opening a client's details. Just ask naturally.",
+      replyUrdu: "میں آپ کو بتا سکتا ہوں: کل واجب الادا وصولیاں، وینڈرز کو کل ادائیگی، کون سے کلائنٹس زیادہ خطرے میں ہیں، اور میں یاد دہانی بھیج سکتا ہوں یا ادائیگی شیڈول کر سکتا ہوں۔ مجھ سے عام زبان میں بات کریں۔"
+    };
+  }
+
+  if ((q.includes('total') && (q.includes('outstanding') || q.includes('receivable'))) || (q.includes('how much') && (q.includes('owed to me') || q.includes('customers owe') || q.includes('clients owe'))) || (q.includes('kitna') && (q.includes('baqaya') || q.includes('wasool')))){
+    const total = invoices.reduce((s,i)=>s+i.amount,0);
+    return {
+      reply: `Your total outstanding receivables are PKR ${formatPKR(total)} across ${clients.length} clients.`,
+      replyUrdu: `آپ کی کل واجب الادا وصولیاں PKR ${formatPKR(total)} ہیں، ${clients.length} کلائنٹس میں۔`
+    };
+  }
+
+  if ((q.includes('total') && (q.includes('payable') || q.includes('owe vendors') || q.includes('owe my vendors'))) || (q.includes('how much') && (q.includes('do i owe') || q.includes('i owe'))) || (q.includes('kitna') && (q.includes('dena') || q.includes('vendor')))){
+    const total = vendorBills.reduce((s,b)=>s+b.amount,0);
+    return {
+      reply: `You currently owe PKR ${formatPKR(total)} to your ${vendors.length} vendors.`,
+      replyUrdu: `آپ پر اپنے ${vendors.length} وینڈرز کے PKR ${formatPKR(total)} واجب الادا ہیں۔`
+    };
+  }
+
+  if (q.includes('net cash') || q.includes('cash position')){
+    const totalReceivables = invoices.reduce((s,i)=>s+i.amount,0);
+    const totalPayables = vendorBills.reduce((s,b)=>s+b.amount,0);
+    const cashInBank = totalCashInBank();
+    const net = cashInBank + totalReceivables - totalPayables;
+    return {
+      reply: `Your net cash position is ${net>=0?'+':'-'}PKR ${formatPKR(Math.abs(net))} (PKR ${formatPKR(cashInBank)} in bank, plus PKR ${formatPKR(totalReceivables)} receivable, minus PKR ${formatPKR(totalPayables)} payable).`,
+      replyUrdu: `آپ کی خالص کیش پوزیشن ${net>=0?'+':'-'}PKR ${formatPKR(Math.abs(net))} ہے۔`
+    };
+  }
+
+  if (q.includes('bank balance') || q.includes('how much cash') || q.includes('bank account')){
+    const cashInBank = totalCashInBank();
+    const lines = bankAccounts.map(a => `${a.bank}: PKR ${formatPKR(a.balance)}`).join(', ');
+    return {
+      reply: `You have PKR ${formatPKR(cashInBank)} total across ${bankAccounts.length} accounts — ${lines}.`,
+      action: () => switchView('bankaccounts')
+    };
+  }
+
+  if (((q.includes('high risk') || q.includes('risky')) && (q.includes('client') || q.includes('customer'))) || (q.includes('khatra') && q.includes('grahak')) || q.includes('risky grahak')){
+    const highRisk = clients.filter(c => riskLevel(riskScore(c)) === 'High');
+    const names = highRisk.map(c=>c.name).join(', ');
+    return {
+      reply: highRisk.length ? `You have ${highRisk.length} high-risk client(s): ${names}.` : 'No clients are currently flagged as high risk.',
+      replyUrdu: highRisk.length ? `آپ کے ${highRisk.length} زیادہ خطرے والے کلائنٹس ہیں: ${names}۔` : 'اس وقت کوئی بھی کلائنٹ زیادہ خطرے میں نہیں ہے۔'
+    };
+  }
+
+  if (q.includes('overdue') && (q.includes('vendor') || q.includes('bill') || q.includes('payable'))){
+    const overdue = vendorBills.filter(b => dayDiff(b.dueDate) > 0);
+    const names = overdue.map(b => getVendor(b.vendorId).name).join(', ');
+    return {
+      reply: overdue.length ? `${overdue.length} vendor bill(s) are overdue: ${names}.` : 'No vendor bills are currently overdue.',
+      replyUrdu: overdue.length ? `${overdue.length} وینڈر بلز واجب الادا ہیں: ${names}۔` : 'اس وقت کوئی وینڈر بل واجب الادا نہیں ہے۔'
+    };
+  }
+
+  if (q.includes('discount')){
+    const eligible = vendorBills.filter(b => getBillPriority(b) === 'Discount');
+    if (!eligible.length) return { reply: 'No early-payment discounts are currently available.', replyUrdu: 'اس وقت کوئی ابتدائی ادائیگی رعایت دستیاب نہیں ہے۔' };
+    const lines = eligible.map(b => `${getVendor(b.vendorId).name} (save ${b.discountPct}% if paid by ${formatDate(b.discountDeadline)})`).join('; ');
+    return { reply: `You can capture early-payment discounts on: ${lines}.`, action: () => switchView('vendors') };
+  }
+
+  if (q.includes('remind') || (q.includes('send') && q.includes('reminder')) || q.includes('yaad') || q.includes('یاد')){
+    const client = findEntityInQuery(q, clients);
+    if (client){
+      const invoice = invoices.find(i => i.clientId === client.id);
+      if (invoice){
+        const slots = extractReminderSlots(q);
+        const missing = [];
+        if (!slots.tone) missing.push('tone (Polite / Firm / Professional)');
+        if (!slots.channel) missing.push('channel (WhatsApp / Email)');
+        if (!slots.language) missing.push('language (English / Roman Urdu / Urdu script)');
+
+        if (missing.length){
+          pendingIntent = { type:'remind', clientId: client.id, invoiceId: invoice.id, tone: slots.tone, channel: slots.channel, language: slots.language };
+          return {
+            reply: `Sure — before I send it to ${client.name}, what ${missing.join(', ')} should I use?`,
+            replyUrdu: `ضرور — ${client.name} کو بھیجنے سے پہلے بتائیں: ٹون، چینل، اور زبان کیا استعمال کروں؟`
+          };
+        }
+        return {
+          reply: `Sending a ${slots.tone} reminder to ${client.name} via ${slots.channel} in ${languageLabel(slots.language)}...`,
+          replyUrdu: `${client.name} کو ${slots.channel} کے ذریعے یاد دہانی بھیج رہا ہوں...`,
+          action: () => performReminderSend(invoice.id, slots.tone, slots.channel, slots.language)
+        };
+      }
+    }
+    return {
+      reply: "Which client would you like me to remind? Try naming them directly, e.g. \"remind Al-Rehman Traders\".",
+      replyUrdu: "میں کس کلائنٹ کو یاد دہانی بھیجوں؟ نام لے کر بتائیں، مثلاً \"Al-Rehman Traders کو یاد دہانی بھیجو\"۔"
+    };
+  }
+
+  if ((q.includes('pay') || q.includes('schedule') || q.includes('paisay') || q.includes('ادائیگی')) && !q.includes('remind')){
+    const vendor = findEntityInQuery(q, vendors);
+    if (vendor){
+      const bill = vendorBills.find(b => b.vendorId === vendor.id);
+      if (bill){
+        return {
+          reply: `Opening payment scheduling for ${vendor.name}, bill ${bill.billNo}.`,
+          replyUrdu: `${vendor.name} کے لیے ادائیگی شیڈول کر رہا ہوں، بل ${bill.billNo}۔`,
+          action: () => { switchView('vendors'); setTimeout(() => schedulePayment(bill.id), 400); }
+        };
+      }
+    }
+  }
+
+  const clientMatch = findEntityInQuery(q, clients);
+  if (clientMatch){
+    const invoice = invoices.find(i => i.clientId === clientMatch.id);
+    const score = riskScore(clientMatch);
+    const level = riskLevel(score);
+    const overdueDays = invoice ? dayDiff(invoice.dueDate) : null;
+    let reply = `${clientMatch.name} is ${level} risk (${score}%).`;
+    if (invoice) reply += ` Invoice ${invoice.invoiceNo} for PKR ${formatPKR(invoice.amount)} is ${overdueDays>0 ? overdueDays+' days overdue' : 'due in '+Math.abs(overdueDays)+' days'}.`;
+    if (q.includes('show') || q.includes('open') || q.includes('detail')){
+      return { reply, action: () => openDetail(clientMatch.id) };
+    }
+    return { reply };
+  }
+
+  const vendorMatch = findEntityInQuery(q, vendors);
+  if (vendorMatch){
+    const bill = vendorBills.find(b => b.vendorId === vendorMatch.id);
+    if (bill){
+      const diff = dayDiff(bill.dueDate);
+      let reply = `${vendorMatch.name}: bill ${bill.billNo} for PKR ${formatPKR(bill.amount)}, ${diff>0? diff+' days overdue' : 'due in '+Math.abs(diff)+' days'}.`;
+      if (bill.discountPct>0) reply += ` A ${bill.discountPct}% discount is available if paid by ${formatDate(bill.discountDeadline)}.`;
+      return { reply, action: () => switchView('vendors') };
+    }
+  }
+
+  const viewMap = { dashboard:'dashboard', clients:'clients', 'client directory':'clients', reminders:'reminders', analytics:'analytics', vendors:'vendors', payables:'vendors', 'activity log':'activitylog', log:'activitylog', activity:'activitylog' };
+  for (const key in viewMap){
+    if (q.includes('go to '+key) || q.includes('open '+key) || q.includes('show '+key) || q.includes('switch to '+key)){
+      return { reply: `Switching to ${key}.`, action: () => switchView(viewMap[key]) };
+    }
+  }
+
+  return {
+    reply: "I'm not sure about that one yet. Try asking about total outstanding, high-risk clients, vendor bills, discounts, or say \"remind [client name]\".",
+    replyUrdu: "معذرت، میں ابھی اس کا جواب نہیں جانتا۔ کل واجب الادا رقم، خطرناک کلائنٹس، یا وینڈر بلز کے بارے میں پوچھیں، یا کہیں \"یاد دہانی بھیجو [کلائنٹ کا نام]\"۔"
+  };
+}
+
+// ---------------------------------------------------------------------------
+// AI ASSISTANT — UI, CHAT RENDERING, VOICE INPUT/OUTPUT
+// ---------------------------------------------------------------------------
+let assistantHistory = [];
+let assistantVoiceOn = false;
+let assistantLang = 'en';
+let recognizer = null;
+let isListening = false;
+let voiceFinalBuffer = '';
+
+function updateAssistantHint(){
+  document.getElementById('assistantHint').textContent = assistantLang === 'ur'
+    ? 'کہیں: "کتنا باقی ہے" یا "Al-Rehman Traders کو یاد دہانی بھیجو"'
+    : 'Try: "high risk clients" or "remind Al-Rehman Traders"';
+}
+
+function addAssistantMessage(role, text, lang){
+  lang = lang || 'en';
+  assistantHistory.push({ role, text });
+  const thread = document.getElementById('assistantThread');
+  const bubble = document.createElement('div');
+  bubble.className = role === 'user' ? 'flex justify-end' : 'flex justify-start';
+  const urduClass = lang === 'ur' ? 'font-urdu text-right' : '';
+  const dir = lang === 'ur' ? 'rtl' : 'ltr';
+  bubble.innerHTML = role === 'user'
+    ? `<div class="max-w-[80%] bg-brand-600 text-white text-sm rounded-2xl rounded-tr-sm px-3.5 py-2.5 ${urduClass}" dir="${dir}">${text}</div>`
+    : `<div class="max-w-[85%] bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm rounded-2xl rounded-tl-sm px-3.5 py-2.5 shadow-sm ${urduClass}" dir="${dir}">${text}</div>`;
+  thread.appendChild(bubble);
+  thread.scrollTop = thread.scrollHeight;
+}
+
+function handleAssistantSubmit(text){
+  const trimmed = text.trim();
+  if (!trimmed) return;
+  addAssistantMessage('user', trimmed, assistantLang);
+  document.getElementById('assistantInput').value = '';
+
+  setTimeout(() => {
+    const result = processAssistantQuery(trimmed);
+    let replyText = result.reply;
+    let replyLangUsed = 'en';
+    if (assistantLang === 'ur'){
+      if (result.replyUrdu){
+        replyText = result.replyUrdu;
+        replyLangUsed = 'ur';
+      } else {
+        replyText = 'معذرت، یہ جواب ابھی صرف انگریزی میں دستیاب ہے: <span class="font-sans" dir="ltr">' + result.reply + '</span>';
+        replyLangUsed = 'ur';
+      }
+    }
+    addAssistantMessage('assistant', replyText, replyLangUsed);
+    if (assistantVoiceOn && window.speechSynthesis){
+      const spoken = (assistantLang === 'ur' && result.replyUrdu) ? result.replyUrdu : result.reply;
+      const utter = new SpeechSynthesisUtterance(spoken.replace(/["#]/g,''));
+      utter.lang = (assistantLang === 'ur' && result.replyUrdu) ? 'ur-PK' : 'en-US';
+      window.speechSynthesis.speak(utter);
+    }
+    if (result.action){
+      setTimeout(result.action, 350);
+    }
+  }, 380);
+}
+
+function initAssistant(){
+  const bubble = document.getElementById('assistantBubble');
+  const panel = document.getElementById('assistantPanel');
+  const closeBtn = document.getElementById('assistantClose');
+  const input = document.getElementById('assistantInput');
+  const sendBtn = document.getElementById('assistantSendBtn');
+  const micBtn = document.getElementById('assistantMicBtn');
+  const voiceToggle = document.getElementById('assistantVoiceToggle');
+  const langEnBtn = document.getElementById('langEnBtn');
+  const langUrBtn = document.getElementById('langUrBtn');
+
+  bubble.addEventListener('click', () => {
+    panel.classList.toggle('hidden');
+    document.getElementById('assistantDot').classList.add('hidden');
+    if (!panel.classList.contains('hidden') && assistantHistory.length === 0){
+      addAssistantMessage('assistant', "Hi, I'm your AiNow assistant. Ask me about outstanding invoices, risky clients, or vendor payments — or tell me to do something, like \"remind Al-Rehman Traders\". Switch to اردو any time.");
+    }
+  });
+  closeBtn.addEventListener('click', () => panel.classList.add('hidden'));
+
+  sendBtn.addEventListener('click', () => handleAssistantSubmit(input.value));
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleAssistantSubmit(input.value); });
+
+  voiceToggle.addEventListener('click', () => {
+    assistantVoiceOn = !assistantVoiceOn;
+    voiceToggle.classList.toggle('bg-white/25', assistantVoiceOn);
+    if (!assistantVoiceOn && window.speechSynthesis) window.speechSynthesis.cancel();
+  });
+
+  [langEnBtn, langUrBtn].forEach(btn => {
+    btn.addEventListener('click', () => {
+      assistantLang = btn.dataset.lang;
+      langEnBtn.classList.toggle('active', assistantLang === 'en');
+      langUrBtn.classList.toggle('active', assistantLang === 'ur');
+      input.placeholder = assistantLang === 'ur' ? 'اردو یا انگریزی میں پوچھیں...' : 'Ask about clients, vendors, risk...';
+      updateAssistantHint();
+      if (recognizer) recognizer.lang = assistantLang === 'ur' ? 'ur-PK' : 'en-US';
+    });
+  });
+
+  const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRecognitionAPI){
+    recognizer = new SpeechRecognitionAPI();
+    recognizer.continuous = true;
+    recognizer.interimResults = true;
+    recognizer.lang = assistantLang === 'ur' ? 'ur-PK' : 'en-US';
+
+    recognizer.addEventListener('result', (e) => {
+      let interim = '';
+      let final = '';
+      for (let i = e.resultIndex; i < e.results.length; i++){
+        const transcript = e.results[i][0].transcript;
+        if (e.results[i].isFinal) final += transcript;
+        else interim += transcript;
+      }
+      if (final) voiceFinalBuffer += final;
+      input.value = (voiceFinalBuffer + interim).trim();
+    });
+    recognizer.addEventListener('end', () => {
+      isListening = false;
+      micBtn.classList.remove('bg-rose-100','text-rose-600','dark:bg-rose-500/20','dark:text-rose-400','pulse-dot');
+      updateAssistantHint();
+      const finalText = voiceFinalBuffer.trim();
+      voiceFinalBuffer = '';
+      if (finalText) handleAssistantSubmit(finalText);
+    });
+    recognizer.addEventListener('error', (e) => {
+      isListening = false;
+      micBtn.classList.remove('bg-rose-100','text-rose-600','dark:bg-rose-500/20','dark:text-rose-400','pulse-dot');
+      updateAssistantHint();
+      const msg = e.error === 'not-allowed' ? 'Microphone access was blocked — check your browser\'s site permissions.' : 'Could not capture audio clearly — try again in a quieter space, or type your question instead.';
+      showToast('Voice input error', msg);
+    });
+
+    micBtn.addEventListener('click', () => {
+      if (isListening){
+        recognizer.stop();
+        return;
+      }
+      voiceFinalBuffer = '';
+      input.value = '';
+      recognizer.lang = assistantLang === 'ur' ? 'ur-PK' : 'en-US';
+      isListening = true;
+      micBtn.classList.add('bg-rose-100','text-rose-600','dark:bg-rose-500/20','dark:text-rose-400','pulse-dot');
+      document.getElementById('assistantHint').textContent = assistantLang === 'ur' ? 'سن رہا ہوں... ختم ہونے پر مائیک دوبارہ دبائیں' : 'Listening... click the mic again when done';
+      try { recognizer.start(); } catch(e) { isListening = false; }
+    });
+  } else {
+    micBtn.addEventListener('click', () => {
+      showToast('Voice input not supported', 'Your browser doesn\'t support speech recognition — try Chrome on desktop, or type your question below.');
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// INIT
+// ---------------------------------------------------------------------------
+renderAll();
+initAssistant();
+</script>
+</body>
+</html>
