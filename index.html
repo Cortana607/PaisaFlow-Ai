@@ -287,7 +287,7 @@ body.light::before{
     body.classList.toggle('light', light);
     ic.textContent  = light ? '☾' : '☀';
     lbl.textContent = light ? 'Dark' : 'Light';
-    var dl=document.getElementById('demo-link'); if(dl){ dl.href='AlKaram_PaisaFlow_demo.html?theme='+(light?'light':'dark'); }
+    var dl=document.getElementById('demo-link'); if(dl){ dl.href='PaisaFlow_demo.html?theme='+(light?'light':'dark'); }
     try { localStorage.setItem('paisaflow-theme', light ? 'light' : 'dark'); } catch(e){}
   }
   var saved;
